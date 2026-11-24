@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "devanalytics",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "observability": { "enabled": true },
+  "vars": { "DAILY_WRITE_LIMIT": "100000" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "devanalytics",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
