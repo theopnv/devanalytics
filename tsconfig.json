@@ -17,5 +17,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "core/**/*.ts", "metrics/**/*.ts", "action/src/**/*.ts", "scripts/**/*.mts", "test/**/*.ts", "eslint.config.ts", "vitest.config.ts"]
+  "include": ["src/**/*.ts", "core/**/*.ts", "metrics/**/*.ts", "action/src/**/*.ts", "scripts/**/*.mts", "scripts/**/*.test.ts", "test/**/*.ts", "eslint.config.ts", "vitest.config.ts"]
 }

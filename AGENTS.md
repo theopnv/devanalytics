@@ -35,7 +35,7 @@ In the PR, list the checks that you could not run.
 | `npm run sync` | Generate the registries and `migrations/` from `metrics/*/`. |
 | `npm run typecheck` | Run `tsc --noEmit`. |
 | `npm run lint` | Run ESLint. Cognitive complexity limit is 15. Cyclomatic complexity limit is 10. |
-| `npm test` | Run Vitest in the Workers runtime with a local D1. |
+| `npm test` | Run Vitest. Tests in `test/` and files named `*.worker.test.ts` run in the Workers runtime with a local D1. All other tests run in Node. |
 | `npm run build:action` | Bundle the Action into `action/dist/`. |
 | `npm run smoke -- <metric>…` | Run the bundled Action against `wrangler dev`. |
 | `npm run backfill -- --metric <name>` | Upload old history. |
