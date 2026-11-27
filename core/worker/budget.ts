@@ -1,3 +1,5 @@
+import type { TableRows } from '../contract.ts';
+
 export const DEFAULT_DAILY_LIMIT = 100_000;
 export const BACKFILL_HEADER = 'X-Devanalytics-Mode';
 
@@ -56,6 +58,11 @@ export function recordUsage(db: D1Database, day: string, rows: number): D1Prepar
   return db.prepare(
     'INSERT INTO usage (day, rows_written) VALUES (?1, ?2) ON CONFLICT (day) DO UPDATE SET rows_written = rows_written + excluded.rows_written',
   ).bind(day, rows);
+}
+
+/** The rows that an ingest writes: the inserts, the rows that the replace deletes, and the one row of `usage`. */
+export function estimateCost(inserts: readonly TableRows[], replaced = 0): number {
+  return inserts.reduce((total, { rows }) => total + rows.length, 0) + replaced + 1;
 }
 
 /** Refuses a snapshot whose rows would take the day above the ceiling. `cost` counts the rows to insert, the rows to delete and the usage row. */

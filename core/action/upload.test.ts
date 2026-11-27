@@ -94,6 +94,20 @@ describe('upload', () => {
     expect(opts.fetch).toHaveBeenCalledTimes(1);
   });
 
+  test('reads the rows that the snapshot needs and the ceiling from a 429 body, and tells a snapshot that is too large', async () => {
+    const tooLarge = await upload(target, 'ci', snapshot, options(fail(429, { error: 'x', cost: 41, limit: 35 }, { 'Retry-After': '60' }))).catch((caught: unknown) => caught);
+    const full = await upload(target, 'ci', snapshot, options(fail(429, { error: 'x', cost: 5, limit: 35 }, { 'Retry-After': '60' }))).catch((caught: unknown) => caught);
+
+    expect([(tooLarge as RateLimitError).cost, (tooLarge as RateLimitError).ceiling, (tooLarge as RateLimitError).tooLarge]).toEqual([41, 35, true]);
+    expect([(full as RateLimitError).cost, (full as RateLimitError).tooLarge]).toEqual([5, false]);
+  });
+
+  test('does not call a 429 too large when the body has no numbers', async () => {
+    const error = await upload(target, 'ci', snapshot, options(fail(429))).catch((caught: unknown) => caught);
+
+    expect((error as RateLimitError).tooLarge).toBe(false);
+  });
+
   test('fails a 429 that has no Retry-After header', async () => {
     const error = await upload(target, 'ci', snapshot, options(fail(429))).catch((caught: unknown) => caught);
 

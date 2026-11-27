@@ -18,7 +18,7 @@ A test metric. It checks the core. It has no dashboard.
 
 | Input | Default | Meaning |
 |---|---|---|
-| `file` | `example.json` | JSON file to read, relative to `working-directory`. |
+| `file` | `example.json` | JSON file to read, relative to `working-directory`. When the file has no `sha` or `date`, they come from the commit that is checked out there. |
 
 ## Rows for each ingest
 

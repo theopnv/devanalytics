@@ -36,10 +36,20 @@ export class RateLimitError extends UploadError {
   override name = 'RateLimitError';
 
   readonly retryAfter: number | undefined;
+  /** The rows that the snapshot needs, and the ceiling of the day, when the Worker says them. */
+  readonly cost: number | undefined;
+  readonly ceiling: number | undefined;
 
-  constructor(message: string, retryAfter: number | undefined) {
+  constructor(message: string, retryAfter: number | undefined, cost?: number, ceiling?: number) {
     super(message, 429);
     this.retryAfter = retryAfter;
+    this.cost = cost;
+    this.ceiling = ceiling;
+  }
+
+  /** A snapshot that needs more rows than the ceiling of one day fails on every day. */
+  get tooLarge(): boolean {
+    return this.cost !== undefined && this.ceiling !== undefined && this.cost > this.ceiling;
   }
 }
 
@@ -70,12 +80,18 @@ function retryAfterSeconds(response: Response): number | undefined {
   return header !== null && Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
 }
 
-function rateLimitError(route: string, response: Response, detail: string, now: Date): RateLimitError {
+function numberField(body: string, name: string): number | undefined {
+  const value = field(parseJson(body), name);
+  return typeof value === 'number' ? value : undefined;
+}
+
+function rateLimitError(route: string, response: Response, body: string, now: Date): RateLimitError {
   const seconds = retryAfterSeconds(response);
+  const detail = errorDetail(body);
   const when = seconds === undefined
     ? 'Try again after 00:00 UTC.'
     : `Try again in ${seconds} seconds, after ${new Date(now.getTime() + seconds * 1000).toISOString()}.`;
-  return new RateLimitError(`Ingest on ${route} was refused by the write budget: ${detail}. ${when}`, seconds);
+  return new RateLimitError(`Ingest on ${route} was refused by the write budget: ${detail}. ${when}`, seconds, numberField(body, 'cost'), numberField(body, 'limit'));
 }
 
 function rowsWritten(body: string, route: string): number {
@@ -116,7 +132,7 @@ export async function upload(target: UploadTarget, metric: string, snapshot: unk
       return { rowsWritten: rowsWritten(text, route) };
     }
     if (response.status === 429) {
-      throw rateLimitError(route, response, errorDetail(text), now());
+      throw rateLimitError(route, response, text, now());
     }
     if (response.status < 500) {
       throw new UploadError(`Ingest on ${route} failed with ${response.status}: ${errorDetail(text)}`, response.status);
