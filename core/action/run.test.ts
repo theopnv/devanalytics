@@ -6,7 +6,12 @@ import { inputVariable, readCoreInputs, readMetricInputs } from './inputs.ts';
 import { runAction } from './run.ts';
 import { UploadError } from './upload.ts';
 
-const [{ metric: exampleMetric }] = collectorRegistry as [CollectorEntry];
+const exampleEntry = collectorRegistry.find(({ metric }) => metric.name === 'example');
+if (!exampleEntry) {
+  throw new Error('metrics/example is missing');
+}
+const { metric: exampleMetric } = exampleEntry;
+const registryNames = collectorRegistry.map(({ metric }) => metric.name).join(', ');
 const fixtures = path.join(import.meta.dirname, '..', '..', 'metrics', 'example', 'fixtures');
 
 const baseEnv = {
@@ -91,7 +96,7 @@ describe('runAction', () => {
     const { deps: runDeps } = deps(vi.fn<typeof fetch>());
 
     await expect(runAction(collectorRegistry, { ...baseEnv, [inputVariable('metric')]: 'nope' }, runDeps)).rejects.toThrow(
-      'Unknown metric "nope". The metrics in this version are: example.',
+      `Unknown metric "nope". The metrics in this version are: ${registryNames}.`,
     );
   });
 

@@ -11,6 +11,11 @@ import type { BackfillDeps } from './run.ts';
 import { makeRepo } from './test-repo.ts';
 import type { FixtureRepo } from './test-repo.ts';
 
+const exampleEntry = collectorRegistry.find(({ metric }) => metric.name === 'example');
+if (!exampleEntry) {
+  throw new Error('metrics/example is missing');
+}
+const registryNames = collectorRegistry.map(({ metric }) => metric.name).join(', ');
 const itemsFile = (count: number): string => JSON.stringify({ items: Array.from({ length: count }, (_, index) => ({ name: `item${index}`, value: index })) });
 const WORKER = 'https://worker.example';
 const env = { DEVANALYTICS_URL: WORKER, DEVANALYTICS_INGEST_TOKEN: 'secret', DAILY_WRITE_LIMIT: '50' };
@@ -130,7 +135,7 @@ describe('runBackfill of commits', () => {
   });
 
   test('refuses a snapshot that is not the one of its commit', async () => {
-    const wrong = { ...collectorRegistry[0] as CollectorEntry, collector: { ...(collectorRegistry[0] as CollectorEntry).collector, collect: async () => ({ sha: 'f'.repeat(40), date: '2026-01-01T00:00:00Z', items: [] }) } };
+    const wrong = { ...exampleEntry, collector: { ...exampleEntry.collector, collect: async () => ({ sha: 'f'.repeat(40), date: '2026-01-01T00:00:00Z', items: [] }) } };
 
     const result = await runBackfill(options('--tags'), deps({ collectors: [wrong] }));
 
@@ -153,7 +158,7 @@ describe('runBackfill of commits', () => {
   });
 
   test.each([
-    ['an unknown metric', ['--metric', 'nope', '--repo', '.', '--tags'], 'Unknown metric "nope". The metrics in this version are: example.'],
+    ['an unknown metric', ['--metric', 'nope', '--repo', '.', '--tags'], `Unknown metric "nope". The metrics in this version are: ${registryNames}.`],
     ['a missing repo', ['--metric', 'example', '--tags'], 'Set --repo to the path'],
     ['a missing selection', ['--metric', 'example', '--repo', '.'], 'Choose the commits with one of'],
     ['an input that the metric does not have', ['--metric', 'example', '--repo', '.', '--tags', '--input', 'nope=1'], 'has no input named nope. Its inputs are: file.'],
@@ -169,7 +174,7 @@ describe('runBackfill of commits', () => {
   });
 
   test('refuses a metric that has no backfill', async () => {
-    const plain = { ...(collectorRegistry[0] as CollectorEntry), collector: { inputs: [], collect: async () => { throw new Error('unused'); } } };
+    const plain = { ...exampleEntry, collector: { inputs: [], collect: async () => { throw new Error('unused'); } } };
 
     await expect(runBackfill(options('--tags'), deps({ collectors: [plain] }))).rejects.toThrow('does not support backfill');
   });
