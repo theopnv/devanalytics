@@ -1,0 +1,8 @@
+{
+  "tests": [
+    { "file": "src/a.test.ts", "title": "a > passes", "state": "passed", "retries": 0, "error": "" },
+    { "file": "src/a.test.ts", "title": "a > flakes", "state": "passed", "retries": 1, "error": "timeout\nstack line" },
+    { "file": "src/b.test.ts", "title": "b > breaks", "state": "failed", "retries": 0, "error": "expected 1 to be 2" },
+    { "file": "src/b.test.ts", "title": "b > waits", "state": "skipped", "retries": 0, "error": "" }
+  ]
+}

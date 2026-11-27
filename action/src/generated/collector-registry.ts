@@ -2,12 +2,21 @@
 
 import type { CollectorEntry } from '../../../core/contract.ts';
 
+import { metric as ciMetric } from '../../../metrics/ci/metric.ts';
+import { collector as ciCollector } from '../../../metrics/ci/collect.ts';
 import { metric as complexityMetric } from '../../../metrics/complexity/metric.ts';
 import { collector as complexityCollector } from '../../../metrics/complexity/collect.ts';
+import { metric as coverageMetric } from '../../../metrics/coverage/metric.ts';
+import { collector as coverageCollector } from '../../../metrics/coverage/collect.ts';
 import { metric as exampleMetric } from '../../../metrics/example/metric.ts';
 import { collector as exampleCollector } from '../../../metrics/example/collect.ts';
+import { metric as testsMetric } from '../../../metrics/tests/metric.ts';
+import { collector as testsCollector } from '../../../metrics/tests/collect.ts';
 
 export const collectorRegistry: readonly CollectorEntry[] = [
+  { metric: ciMetric, collector: ciCollector },
   { metric: complexityMetric, collector: complexityCollector },
+  { metric: coverageMetric, collector: coverageCollector },
   { metric: exampleMetric, collector: exampleCollector },
+  { metric: testsMetric, collector: testsCollector },
 ];

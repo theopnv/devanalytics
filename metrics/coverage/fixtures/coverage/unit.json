@@ -1,0 +1,6 @@
+{
+  "testResults": [
+    { "name": "src/main/a.test.ts", "assertionResults": [{ "status": "passed" }, { "status": "passed" }, { "status": "failed" }] },
+    { "name": "src/main/feed/b.test.ts", "assertionResults": [{ "status": "passed" }, { "status": "skipped" }] }
+  ]
+}

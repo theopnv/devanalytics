@@ -1,0 +1,10 @@
+{
+  "suites": [
+    {
+      "title": "feeds.spec.ts",
+      "specs": [
+        { "title": "adds a feed", "file": "feeds.spec.ts", "tests": [{ "status": "expected", "results": [{ "status": "passed" }] }] }
+      ]
+    }
+  ]
+}

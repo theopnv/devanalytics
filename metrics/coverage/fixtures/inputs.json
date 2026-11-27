@@ -1,0 +1,4 @@
+{
+  "reports": "unit=coverage/unit.info\ne2e=coverage/e2e.info",
+  "test-results": "unit=coverage/unit.json"
+}
