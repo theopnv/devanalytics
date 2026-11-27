@@ -1,5 +1,4 @@
-export default {
-  fetch(): Response {
-    return Response.json({ error: 'not found' }, { status: 404 });
-  },
-} satisfies ExportedHandler<Env>;
+import { createWorker } from '../core/worker/router.ts';
+import { workerRegistry } from './generated/worker-registry.ts';
+
+export default createWorker(workerRegistry);
