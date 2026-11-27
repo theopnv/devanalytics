@@ -50,6 +50,7 @@ export async function buildAction(root: string): Promise<void> {
     target: 'node24',
     // ESLint and TypeScript read __filename, which an ES module does not have.
     format: 'cjs',
+    minify: true,
     legalComments: 'none',
     logLevel: 'warning',
   });
