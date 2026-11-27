@@ -58,7 +58,7 @@ For 1000 functions in 40 folders, an ingest writes about 1000 + 80 rows. Replaci
 
 ```yaml
 - uses: actions/checkout@v4
-- uses: <owner>/devanalytics/action@v1
+- uses: <owner>/devanalytics/action@v0.0.1
   with:
     metric: complexity
     worker-url: ${{ vars.DEVANALYTICS_URL }}

@@ -75,7 +75,7 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: <owner>/devanalytics/action@v1
+      - uses: <owner>/devanalytics/action@v0.0.1
         with:
           metric: ci
           worker-url: ${{ vars.DEVANALYTICS_URL }}

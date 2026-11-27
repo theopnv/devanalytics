@@ -48,6 +48,7 @@ Each step has a guide:
 - [Security](docs/security.md): the tokens, the query guard and how to rotate a token.
 - [Architecture](docs/architecture.md): the contract between the core and a metric, and the four flows.
 - [Write a metric](docs/write-a-metric.md): add your own metric.
+- [Release](docs/release.md): publish a version and test it.
 
 ## Commands
 
