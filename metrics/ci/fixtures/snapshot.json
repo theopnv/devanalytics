@@ -1,0 +1,39 @@
+{
+  "run_id": 77,
+  "run_attempt": 2,
+  "date": "2026-11-20T09:00:10.000Z",
+  "sha": "cccccccccccccccccccccccccccccccccccccccc",
+  "workflow": "Test",
+  "event": "pull_request",
+  "branch": "feature",
+  "conclusion": "success",
+  "wall_seconds": 300,
+  "labels": { "team": "web" },
+  "jobs": [
+    {
+      "id": 1,
+      "name": "unit (ubuntu-latest)",
+      "runner": "ubuntu-latest",
+      "os": "linux",
+      "conclusion": "success",
+      "queue_seconds": 5,
+      "duration_seconds": 120,
+      "steps": [
+        { "number": 2, "name": "Install dependencies", "conclusion": "success", "duration_seconds": 14 },
+        { "number": 3, "name": "Run tests", "conclusion": "skipped", "duration_seconds": null }
+      ],
+      "groups": [{ "name": "Run npm ci", "duration_ms": 134000 }]
+    },
+    {
+      "id": 2,
+      "name": "unit (macos-latest)",
+      "runner": "",
+      "os": "other",
+      "conclusion": "cancelled",
+      "queue_seconds": null,
+      "duration_seconds": null,
+      "steps": [],
+      "groups": []
+    }
+  ]
+}

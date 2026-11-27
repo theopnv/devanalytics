@@ -2,6 +2,8 @@
 
 import type { WorkerEntry } from '../../core/contract.ts';
 
+import { metric as ciMetric } from '../../metrics/ci/metric.ts';
+import { store as ciStore } from '../../metrics/ci/store.ts';
 import { metric as complexityMetric } from '../../metrics/complexity/metric.ts';
 import { store as complexityStore } from '../../metrics/complexity/store.ts';
 import { metric as coverageMetric } from '../../metrics/coverage/metric.ts';
@@ -12,6 +14,7 @@ import { metric as testsMetric } from '../../metrics/tests/metric.ts';
 import { store as testsStore } from '../../metrics/tests/store.ts';
 
 export const workerRegistry: readonly WorkerEntry[] = [
+  { metric: ciMetric, store: ciStore },
   { metric: complexityMetric, store: complexityStore },
   { metric: coverageMetric, store: coverageStore },
   { metric: exampleMetric, store: exampleStore },
