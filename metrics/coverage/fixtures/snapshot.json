@@ -1,0 +1,17 @@
+{
+  "sha": "0123456789abcdef0123456789abcdef01234567",
+  "date": "2026-01-15T10:00:00.000Z",
+  "suites": {
+    "unit": [
+      { "file": "src/main/a.ts", "lines": [2, 4], "statements": [2, 4], "functions": [1, 2], "branches": [1, 2] },
+      { "file": "src/main/feed/b.ts", "lines": [2, 2], "statements": [2, 2], "functions": [1, 1], "branches": [0, 0] }
+    ],
+    "total": [
+      { "file": "src/main/a.ts", "lines": [4, 4], "statements": [4, 4], "functions": [2, 2], "branches": [2, 2] },
+      { "file": "src/main/feed/b.ts", "lines": [2, 2], "statements": [2, 2], "functions": [1, 1], "branches": [0, 0] }
+    ]
+  },
+  "tests": {
+    "unit": { "files": 2, "tests": 5, "passed": 3, "failed": 1, "skipped": 1 }
+  }
+}

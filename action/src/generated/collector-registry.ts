@@ -4,10 +4,13 @@ import type { CollectorEntry } from '../../../core/contract.ts';
 
 import { metric as complexityMetric } from '../../../metrics/complexity/metric.ts';
 import { collector as complexityCollector } from '../../../metrics/complexity/collect.ts';
+import { metric as coverageMetric } from '../../../metrics/coverage/metric.ts';
+import { collector as coverageCollector } from '../../../metrics/coverage/collect.ts';
 import { metric as exampleMetric } from '../../../metrics/example/metric.ts';
 import { collector as exampleCollector } from '../../../metrics/example/collect.ts';
 
 export const collectorRegistry: readonly CollectorEntry[] = [
   { metric: complexityMetric, collector: complexityCollector },
+  { metric: coverageMetric, collector: coverageCollector },
   { metric: exampleMetric, collector: exampleCollector },
 ];
