@@ -1,0 +1,11 @@
+{
+  "sha": "0123456789abcdef0123456789abcdef01234567",
+  "date": "2026-01-15T10:00:00.000Z",
+  "cognitive_limit": 15,
+  "cyclomatic_limit": 10,
+  "functions": [
+    { "file": "src/main/a.ts", "qualified_name": "load", "line": 3, "cyclomatic": 12, "cognitive": 20, "is_test": false },
+    { "file": "src/main/feed/b.ts", "qualified_name": "River > useEffect", "line": 10, "cyclomatic": 2, "cognitive": 1, "is_test": false },
+    { "file": "src/main/a.test.ts", "qualified_name": "checks", "line": 1, "cyclomatic": 3, "cognitive": 2, "is_test": true }
+  ]
+}
