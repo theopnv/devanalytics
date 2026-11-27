@@ -70,7 +70,7 @@ The answer looks like this:
 { "day": "2026-11-27", "rowsWritten": 0, "limit": 95000, "backfillLimit": 70000 }
 ```
 
-An answer of `401` means that the token is wrong, or that `QUERY_TOKEN` is not set. An answer of `422` about a missing table means that you did not run step 2.
+A new secret can need a few seconds before the Worker uses it. If you get `401`, wait 10 seconds and try again. If the answer stays `401`, the token is wrong, or `QUERY_TOKEN` is not set. An answer of `422` about a missing table means that you did not run step 2.
 
 ## 5. Connect your repository
 
@@ -122,7 +122,7 @@ All numbers are rows written by one ingest. Each ingest adds one row to `usage`.
 
 An example for a repository with 20 merges and 60 workflow runs each day: `20 × (1,080 + 660)` for the commit metrics gives about 35,000 rows, and `60 × (85 + 14)` for the run metrics gives about 6,000 rows. The total is about 41,000 rows each day, which is below the limit. If a day passes the limit, use fewer coverage suites, or collect fewer folders.
 
-The `rows read` limit grows with the use of your dashboards. A Grafana cache of 1 hour keeps it low (see `docs/setup-grafana.md`).
+The `rows read` limit grows with the use of your dashboards. A Grafana query cache of 1 hour keeps it low on a plan that has one (see `docs/setup-grafana.md`). A test with a small repository (421 functions and 17 CI runs) read about 3,400 rows for one view of all four dashboards. The panel "Top functions" grows with the size of the newest commit, and the CI panels grow with the number of runs, because they read the whole history.
 
 ## Local development
 

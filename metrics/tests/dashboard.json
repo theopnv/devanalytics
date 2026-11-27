@@ -448,7 +448,26 @@
       "options": {
         "showHeader": true,
         "cellHeight": "sm"
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "file": 0,
+              "title": 1,
+              "suite": 2,
+              "flaky_runs": 3,
+              "suite_runs": 4,
+              "rate_pct": 5,
+              "last_seen": 6,
+              "last_run_id": 7
+            },
+            "excludeByName": {},
+            "renameByName": {}
+          }
+        }
+      ]
     },
     {
       "datasource": {
@@ -567,7 +586,25 @@
       "options": {
         "showHeader": true,
         "cellHeight": "sm"
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "date": 0,
+              "suite": 1,
+              "runner": 2,
+              "file": 3,
+              "title": 4,
+              "error": 5,
+              "run_id": 6
+            },
+            "excludeByName": {},
+            "renameByName": {}
+          }
+        }
+      ]
     }
   ],
   "refresh": "",

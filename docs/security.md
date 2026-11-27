@@ -77,7 +77,7 @@ A Grafana public dashboard shows its panels to anyone with the link.
 - A viewer sees all the data that the panels show: file paths, function names, test titles and error lines.
 - Use a public dashboard for a public repository only.
 - Public dashboards do not support template variables. Each panel query uses a fallback when the variable is not replaced. The fallback is the root folder `.`, the suite `total`, the workflow with the most runs, and the log group with the most time.
-- Grafana caches each answer for one hour, so a public dashboard does not send each view to D1.
+- On a Grafana plan with query caching, Grafana caches each answer for one hour, so a public dashboard does not send each view to D1. Without a cache, each view reads D1. Check the read limit in `docs/setup-cloudflare.md`.
 
 ## Rotate a token
 

@@ -533,7 +533,24 @@
       "options": {
         "showHeader": true,
         "cellHeight": "sm"
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "job": 0,
+              "os": 1,
+              "runs": 2,
+              "p50": 3,
+              "p90": 4,
+              "p95": 5
+            },
+            "excludeByName": {},
+            "renameByName": {}
+          }
+        }
+      ]
     },
     {
       "datasource": {
@@ -547,8 +564,8 @@
       "gridPos": {
         "x": 0,
         "y": 25,
-        "w": 12,
-        "h": 10
+        "w": 24,
+        "h": 9
       },
       "targets": [
         {
@@ -610,7 +627,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "avg_seconds"
+              "options": "avg"
             },
             "properties": [
               {
@@ -622,7 +639,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "slowest_seconds"
+              "options": "slowest"
             },
             "properties": [
               {
@@ -636,7 +653,26 @@
       "options": {
         "showHeader": true,
         "cellHeight": "sm"
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "job": 0,
+              "os": 1,
+              "name": 2,
+              "avg_seconds": 3,
+              "slowest_seconds": 4
+            },
+            "excludeByName": {},
+            "renameByName": {
+              "avg_seconds": "avg",
+              "slowest_seconds": "slowest"
+            }
+          }
+        }
+      ]
     },
     {
       "datasource": {
@@ -648,10 +684,10 @@
       "title": "Slowest log groups",
       "description": "The same for the log groups. A group splits a composite action, and it splits the checkout, into their parts.",
       "gridPos": {
-        "x": 12,
-        "y": 25,
-        "w": 12,
-        "h": 10
+        "x": 0,
+        "y": 34,
+        "w": 24,
+        "h": 9
       },
       "targets": [
         {
@@ -713,7 +749,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "avg_seconds"
+              "options": "avg"
             },
             "properties": [
               {
@@ -725,7 +761,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "slowest_seconds"
+              "options": "slowest"
             },
             "properties": [
               {
@@ -739,7 +775,26 @@
       "options": {
         "showHeader": true,
         "cellHeight": "sm"
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "job": 0,
+              "os": 1,
+              "name": 2,
+              "avg_seconds": 3,
+              "slowest_seconds": 4
+            },
+            "excludeByName": {},
+            "renameByName": {
+              "avg_seconds": "avg",
+              "slowest_seconds": "slowest"
+            }
+          }
+        }
+      ]
     }
   ],
   "refresh": "",

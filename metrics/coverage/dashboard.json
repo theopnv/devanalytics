@@ -44,12 +44,6 @@
     },
     {
       "type": "panel",
-      "id": "bargauge",
-      "name": "bargauge",
-      "version": ""
-    },
-    {
-      "type": "panel",
       "id": "stat",
       "name": "stat",
       "version": ""
@@ -282,7 +276,7 @@
         "uid": "${DS_DEVANALYTICS}"
       },
       "id": 3,
-      "type": "bargauge",
+      "type": "barchart",
       "title": "Line coverage by suite",
       "description": "The line coverage of the folder for each suite in the newest snapshot.",
       "gridPos": {
@@ -327,41 +321,32 @@
       ],
       "fieldConfig": {
         "defaults": {
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "gradientMode": "none"
+          },
           "unit": "percent",
           "min": 0,
-          "max": 100,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 60
-              },
-              {
-                "color": "green",
-                "value": 80
-              }
-            ]
-          },
-          "color": {
-            "mode": "thresholds"
-          }
+          "max": 100
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": true,
-          "calcs": [],
-          "fields": ""
-        },
+        "xField": "suite",
         "orientation": "horizontal",
-        "displayMode": "gradient",
-        "showUnfilled": true
+        "showValue": "auto",
+        "stacking": "none",
+        "xTickLabelRotation": -45,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
@@ -596,7 +581,22 @@
       "options": {
         "showHeader": true,
         "cellHeight": "sm"
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "file": 0,
+              "lines_pct": 1,
+              "uncovered_lines": 2,
+              "sha": 3
+            },
+            "excludeByName": {},
+            "renameByName": {}
+          }
+        }
+      ]
     },
     {
       "id": 101,
@@ -766,7 +766,22 @@
       "options": {
         "showHeader": true,
         "cellHeight": "sm"
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "suite": 0,
+              "tests": 1,
+              "files": 2,
+              "skipped": 3
+            },
+            "excludeByName": {},
+            "renameByName": {}
+          }
+        }
+      ]
     }
   ],
   "refresh": "",

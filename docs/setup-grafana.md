@@ -21,8 +21,41 @@ You make one data source for all dashboards. Each panel sets the route of its me
 1. Add a new **Infinity** data source. Give it a name, for example `Devanalytics`.
 2. **Authentication:** choose **Bearer token** and paste the `QUERY_TOKEN` of the Worker.
 3. **Allowed hosts:** add the address of the Worker, for example `https://devanalytics.<your-subdomain>.workers.dev`. Infinity refuses a host that is not in this list.
-4. **Cache:** enable query caching with a time to live of 1 hour (`3600000` ms). Your data changes only when a commit is merged or a run ends, and the cache keeps the D1 reads low. If the data source has no **Cache** tab on your plan, use the cache setting of Infinity and set 3600 seconds.
+4. **Cache (optional):** if the data source has a **Cache** tab, enable query caching with a time to live of 1 hour (`3600000` ms). Your data changes only when a commit is merged or a run ends, so a cache keeps the D1 reads low. Query caching is not on every Grafana Cloud plan. The free plan has no **Cache** tab. Without a cache, each view of a dashboard reads D1. This is fine for a private dashboard (see the read limit in `docs/setup-cloudflare.md`).
 5. Select **Save & test**.
+
+### Add the data source with the `gcx` CLI
+
+You can make the same data source with the Grafana CLI. Save this manifest as `datasource.yaml`. The token comes from an environment variable, so it never goes into a file.
+
+```yaml
+apiVersion: yesoreyeram-infinity-datasource.datasource.grafana.app/v0alpha1
+kind: DataSource
+metadata:
+  name: devanalytics
+secure:
+  bearerToken:
+    fromEnv: DEVANALYTICS_QUERY_TOKEN
+spec:
+  type: yesoreyeram-infinity-datasource
+  title: Devanalytics
+  access: proxy
+  url: https://devanalytics.<your-subdomain>.workers.dev
+  jsonData:
+    allowedHosts:
+      - https://devanalytics.<your-subdomain>.workers.dev
+    auth_method: bearerToken
+    global_queries: []
+    oauthPassThru: false
+```
+
+```
+export DEVANALYTICS_QUERY_TOKEN="<QUERY_TOKEN>"
+gcx datasources create -f datasource.yaml
+gcx datasources health devanalytics
+```
+
+The `uid` of the data source is the `name` in the manifest, here `devanalytics`.
 
 ## 3. Import the dashboards
 
@@ -44,7 +77,7 @@ Grafana writes the values into the dashboard when you import it, so you can use 
 
 ### Import with the Grafana API
 
-You can import all dashboards in one command. Make a service account in Grafana with the role **Editor**, and make a token for it. Then run:
+You can import all dashboards in one command. With the `gcx` CLI, use `gcx api` in place of `curl`: it uses your login. With `curl`, make a service account in Grafana with the role **Editor**, and make a token for it. Then run:
 
 ```
 export GRAFANA_URL="https://<your-stack>.grafana.net"
@@ -68,6 +101,8 @@ done
 
 The uid of the data source is in the address of its settings page: `/connections/datasources/edit/<uid>`.
 
+To put the dashboards in a folder, make the folder first (`gcx api /api/folders -d '{"uid":"devanalytics","title":"Devanalytics"}'`), and add `folderUid: "devanalytics"` next to `overwrite: true` in the `jq` program.
+
 ## The variables
 
 | Variable | Dashboard | Meaning | Default |
@@ -83,7 +118,7 @@ The panels send the value of a variable as a bound parameter, `"params": ["$fold
 
 Each dashboard has the fixed range `now-1y/d` to `now/d`. The `/d` rounds both ends to the day.
 
-Grafana puts the time range in the key of its cache. A range such as "Last 1 year" changes at each load, so most views miss the cache and read D1 each time. A range that is rounded to the day gives the same key all day. If you change the range, use a rounded range or fixed dates.
+On a plan with query caching, Grafana puts the time range in the key of its cache. A range such as "Last 1 year" changes at each load, so most views miss the cache and read D1 each time. A range that is rounded to the day gives the same key all day. If you change the range, use a rounded range or fixed dates.
 
 The panels do not filter by time in their SQL. The range only chooses which part of the history the charts show. Make it longer if your history is longer than one year.
 

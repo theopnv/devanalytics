@@ -521,7 +521,24 @@
       "options": {
         "showHeader": true,
         "cellHeight": "sm"
-      }
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "qualified_name": 0,
+              "file": 1,
+              "line": 2,
+              "cognitive": 3,
+              "cyclomatic": 4,
+              "sha": 5
+            },
+            "excludeByName": {},
+            "renameByName": {}
+          }
+        }
+      ]
     }
   ],
   "refresh": "",

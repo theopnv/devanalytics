@@ -162,7 +162,7 @@ sequenceDiagram
   Panel->>W: POST /v1/metric/query with sql, params and QUERY_TOKEN
   W->>W: check the token and the allow list of tables
   W->>D1: SELECT
-  W-->>Panel: rows, truncated, meta (Grafana caches it for 1 hour)
+  W-->>Panel: rows, truncated, meta (Grafana can cache it for 1 hour)
   Shields->>W: GET /v1/coverage/badge, no token
   W->>D1: one fixed query
   W-->>Shields: label, message, color (cached for 1 hour)
