@@ -75,6 +75,21 @@ Each metric has its own dashboard: `metrics/<name>/dashboard.json`. Import the d
 
 Grafana writes the values into the dashboard when you import it, so you can use the dashboard with no more setup. To change a value later, import the file again with the new value. The `uid` of each dashboard stays the same, so Grafana asks if it can overwrite the old version.
 
+### One dashboard for all metrics
+
+`npm run dashboard` puts the dashboards of your metrics on one page. It makes one row for each metric. A metric whose dashboard has rows keeps them, with the name of the metric in front.
+
+```
+npm run dashboard -- --out devanalytics.json
+```
+
+Import `devanalytics.json` as in the steps above. The fields are the same: the data source, the Worker URL and the repository URL. The `uid` of the dashboard is `devanalytics`.
+
+- Use `--metrics complexity,coverage` to choose the metrics and their order. The default is every metric that has a `dashboard.json`: `complexity`, `coverage`, `ci` and `tests`, then any other.
+- Two dashboards can use the same variable name. The combined dashboard gives each metric its own copy, for example `complexity_folder` and `coverage_folder`.
+- Run the command again after a change to a `dashboard.json`, and import the new file. The combined file is not stored in the repository.
+- You can import the separate dashboards too. They have other `uid` values, so the two kinds do not overwrite each other.
+
 ### Import with the Grafana API
 
 You can import all dashboards in one command. With the `gcx` CLI, use `gcx api` in place of `curl`: it uses your login. With `curl`, make a service account in Grafana with the role **Editor**, and make a token for it. Then run:

@@ -37,7 +37,7 @@ The setup takes about 15 minutes.
    ```
 
    The badge shows the line coverage of the suite `total` and the folder `.`. Add `%3Fsuite%3Dunit%26folder%3Dsrc` after `badge` to choose another suite or folder.
-7. **Draw the dashboards.** Install the Infinity plugin in Grafana Cloud, add a data source with the `QUERY_TOKEN`, and import `metrics/*/dashboard.json`.
+7. **Draw the dashboards.** Install the Infinity plugin in Grafana Cloud, add a data source with the `QUERY_TOKEN`, and import `metrics/*/dashboard.json`. Or run `npm run dashboard -- --out devanalytics.json` and import that one file, which has a row for each metric.
 8. **Optional: load your history.** Run `npm run backfill`. It stays inside the free limits and continues on the next day when it must.
 
 Each step has a guide:
@@ -59,6 +59,7 @@ Each step has a guide:
 | `npm run dev` | Start the Worker on a local database. |
 | `npm run deploy` | Deploy the Worker. |
 | `npm run backfill -- --metric <name>` | Load old history. |
+| `npm run dashboard -- --out <file>` | Make one Grafana dashboard with a row for each metric. |
 | `npm run smoke -- <metric>` | Test a metric from the Action to a local Worker. |
 | `npm run typecheck`, `npm run lint`, `npm test` | The checks that CI runs. |
 

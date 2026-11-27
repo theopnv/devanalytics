@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "build:action": "node scripts/build-action.mts",
+    "dashboard": "node scripts/dashboard.mts",
     "smoke": "node scripts/smoke.mts",
     "backfill": "node scripts/backfill.mts",
     "dev": "wrangler dev",

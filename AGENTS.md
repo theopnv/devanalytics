@@ -39,6 +39,7 @@ In the PR, list the checks that you could not run.
 | `npm run build:action` | Bundle the Action into `action/dist/`. Also write the metric inputs into `action/action.yml`. |
 | `npm run smoke -- <metric>…` | Run `sync` and `build:action`, start `wrangler dev` on a temporary local D1, run the bundled Action on `metrics/<metric>/fixtures/`, and read the rows back. The optional `fixtures/inputs.json` gives the input values of the metric. The optional `fixtures/github.json` (`repository` and `routes`) stands in for the GitHub API. |
 | `npm run backfill -- --metric <name>` | Upload old history. |
+| `npm run dashboard -- --out <file>` | Combine the `metrics/*/dashboard.json` files into one Grafana dashboard. |
 | `npm run dev` | Start the Worker on a local D1. |
 | `npm run migrate:local`, `npm run migrate:remote` | Run `sync`, then apply the migrations. |
 | `npm run types` | Regenerate `worker-configuration.d.ts`. Copy `.dev.vars.example` to `.dev.vars` first, or the token bindings are lost. |
