@@ -74,7 +74,7 @@ With 300 files in 30 folders and two suites (`unit` and `total`), an ingest writ
 ```yaml
 - uses: actions/checkout@v4
 - run: npx vitest run --coverage --coverage.reporter=lcov
-- uses: <owner>/devanalytics/action@v1
+- uses: <owner>/devanalytics/action@v0.0.1
   with:
     metric: coverage
     worker-url: ${{ vars.DEVANALYTICS_URL }}

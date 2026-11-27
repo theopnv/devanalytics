@@ -27,7 +27,7 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: theopnv/devanalytics/action@v1
+      - uses: theopnv/devanalytics/action@v0.0.1
         with:
           metric: ci
           worker-url: ${{ vars.DEVANALYTICS_URL }}
@@ -42,7 +42,7 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: reports
-      - uses: theopnv/devanalytics/action@v1
+      - uses: theopnv/devanalytics/action@v0.0.1
         with:
           metric: tests
           worker-url: ${{ vars.DEVANALYTICS_URL }}

@@ -35,7 +35,7 @@ One row for each file. A build with 40 files writes about 41 rows. Replacing an 
 ```yaml
 - uses: actions/checkout@v4
 - run: npm ci && npm run build
-- uses: <owner>/devanalytics/action@v1
+- uses: <owner>/devanalytics/action@v0.0.1
   with:
     metric: bundlesize
     worker-url: ${{ vars.DEVANALYTICS_URL }}

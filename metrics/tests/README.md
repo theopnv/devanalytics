@@ -73,7 +73,7 @@ Use a `workflow_run` workflow, so that a pull request cannot read the token.
     run-id: ${{ github.event.workflow_run.id }}
     github-token: ${{ secrets.GITHUB_TOKEN }}
     path: reports
-- uses: <owner>/devanalytics/action@v1
+- uses: <owner>/devanalytics/action@v0.0.1
   with:
     metric: tests
     worker-url: ${{ vars.DEVANALYTICS_URL }}

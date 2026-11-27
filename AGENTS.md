@@ -37,7 +37,7 @@ In the PR, list the checks that you could not run.
 | `npm run lint` | Run ESLint. Cognitive complexity limit is 15. Cyclomatic complexity limit is 10. |
 | `npm test` | Run Vitest. Tests in `test/` and files named `*.worker.test.ts` run in the Workers runtime with a local D1. All other tests run in Node. |
 | `npm run build:action` | Bundle the Action into `action/dist/`. Also write the metric inputs into `action/action.yml`. |
-| `npm run smoke -- <metric>…` | Run `sync` and `build:action`, start `wrangler dev` on a temporary local D1, run the bundled Action on `metrics/<metric>/fixtures/`, and read the rows back. The optional `fixtures/inputs.json` gives the input values of the metric. |
+| `npm run smoke -- <metric>…` | Run `sync` and `build:action`, start `wrangler dev` on a temporary local D1, run the bundled Action on `metrics/<metric>/fixtures/`, and read the rows back. The optional `fixtures/inputs.json` gives the input values of the metric. The optional `fixtures/github.json` (`repository` and `routes`) stands in for the GitHub API. |
 | `npm run backfill -- --metric <name>` | Upload old history. |
 | `npm run dev` | Start the Worker on a local D1. |
 | `npm run migrate:local`, `npm run migrate:remote` | Run `sync`, then apply the migrations. |

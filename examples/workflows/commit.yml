@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: theopnv/devanalytics/action@v1
+      - uses: theopnv/devanalytics/action@v0.0.1
         with:
           metric: complexity
           worker-url: ${{ vars.DEVANALYTICS_URL }}
@@ -34,7 +34,7 @@ jobs:
       - run: npm ci
       # Use your own test command. It must write an Istanbul coverage-final.json or an lcov.info.
       - run: npx vitest run --coverage --coverage.reporter=lcov --reporter=json --outputFile=test-results/vitest.json
-      - uses: theopnv/devanalytics/action@v1
+      - uses: theopnv/devanalytics/action@v0.0.1
         with:
           metric: coverage
           worker-url: ${{ vars.DEVANALYTICS_URL }}

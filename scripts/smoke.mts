@@ -1,4 +1,6 @@
 import { readFile } from 'node:fs/promises';
+import { createServer } from 'node:http';
+import type { Server } from 'node:http';
 import path from 'node:path';
 import { inputVariable, readMetricInputs } from '../core/action/inputs.ts';
 import type { WorkerEntry } from '../core/contract.ts';
@@ -21,6 +23,39 @@ async function fixtureInputs(folder: string): Promise<Record<string, string>> {
     throw error;
   });
   return JSON.parse(text) as Record<string, string>;
+}
+
+interface FakeGithub {
+  repository: string;
+  routes: Record<string, unknown>;
+}
+
+/** A fixtures folder with `github.json` stands in for the GitHub API, which a collector of runs reads. */
+async function startFakeGithub(folder: string): Promise<{ server: Server; apiUrl: string; repository: string } | undefined> {
+  const text = await readFile(path.join(folder, 'github.json'), 'utf8').catch((error: NodeJS.ErrnoException) => {
+    if (error.code === 'ENOENT') {
+      return undefined;
+    }
+    throw error;
+  });
+  if (text === undefined) {
+    return undefined;
+  }
+  const { repository, routes } = JSON.parse(text) as FakeGithub;
+  const server = createServer((request, response) => {
+    const body = routes[request.url ?? ''];
+    if (body === undefined) {
+      response.writeHead(404).end('Not Found');
+      return;
+    }
+    response.writeHead(200, { 'Content-Type': typeof body === 'string' ? 'text/plain' : 'application/json' }).end(typeof body === 'string' ? body : JSON.stringify(body));
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const address = server.address();
+  if (typeof address !== 'object' || address === null) {
+    throw new Error('The fake GitHub API has no port.');
+  }
+  return { server, apiUrl: `http://127.0.0.1:${address.port}`, repository };
 }
 
 async function countRows(worker: DevWorker, metric: string, table: string, key: ReturnType<typeof snapshotKey>): Promise<number> {
@@ -58,8 +93,27 @@ async function smokeMetric(dev: DevWorker, name: string, { workers, collectors }
 
   const fixtures = path.join(root, 'metrics', name, 'fixtures');
   const inputs = await fixtureInputs(fixtures);
+  const github = await startFakeGithub(fixtures);
+  try {
+    return await smokeCollected(dev, { worker, collector }, fixtures, inputs, github);
+  } finally {
+    github?.server.close();
+  }
+}
+
+type FakeGithubServer = Awaited<ReturnType<typeof startFakeGithub>>;
+
+async function smokeCollected(
+  dev: DevWorker,
+  { worker, collector }: { worker: WorkerEntry; collector: Registries['collectors'][number] },
+  fixtures: string,
+  inputs: Record<string, string>,
+  github: FakeGithubServer,
+): Promise<string> {
+  const name = worker.metric.name;
   const env: NodeJS.ProcessEnv = {
     ...process.env,
+    ...(github ? { GITHUB_API_URL: github.apiUrl, GITHUB_REPOSITORY: github.repository } : {}),
     [inputVariable('metric')]: name,
     [inputVariable('worker-url')]: dev.url,
     [inputVariable('token')]: dev.ingestToken,
