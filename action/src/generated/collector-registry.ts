@@ -8,9 +8,12 @@ import { metric as coverageMetric } from '../../../metrics/coverage/metric.ts';
 import { collector as coverageCollector } from '../../../metrics/coverage/collect.ts';
 import { metric as exampleMetric } from '../../../metrics/example/metric.ts';
 import { collector as exampleCollector } from '../../../metrics/example/collect.ts';
+import { metric as testsMetric } from '../../../metrics/tests/metric.ts';
+import { collector as testsCollector } from '../../../metrics/tests/collect.ts';
 
 export const collectorRegistry: readonly CollectorEntry[] = [
   { metric: complexityMetric, collector: complexityCollector },
   { metric: coverageMetric, collector: coverageCollector },
   { metric: exampleMetric, collector: exampleCollector },
+  { metric: testsMetric, collector: testsCollector },
 ];

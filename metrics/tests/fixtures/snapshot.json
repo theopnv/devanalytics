@@ -1,0 +1,13 @@
+{
+  "run_id": 1234567890,
+  "run_attempt": 1,
+  "date": "2026-01-15T10:00:00.000Z",
+  "suites": [
+    { "suite": "unit", "runner": "ubuntu-latest", "tests": 4, "passed": 2, "failed": 1, "skipped": 1, "flaky": 1 },
+    { "suite": "e2e", "runner": "ubuntu-latest", "tests": 1, "passed": 1, "failed": 0, "skipped": 0, "flaky": 0 }
+  ],
+  "exceptions": [
+    { "suite": "unit", "runner": "ubuntu-latest", "file": "src/a.test.ts", "title": "a > flakes", "status": "flaky", "retries": 1, "error": "timeout" },
+    { "suite": "unit", "runner": "ubuntu-latest", "file": "src/b.test.ts", "title": "b > breaks", "status": "failed", "retries": 0, "error": "expected 1 to be 2" }
+  ]
+}

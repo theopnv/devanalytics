@@ -8,9 +8,12 @@ import { metric as coverageMetric } from '../../metrics/coverage/metric.ts';
 import { store as coverageStore } from '../../metrics/coverage/store.ts';
 import { metric as exampleMetric } from '../../metrics/example/metric.ts';
 import { store as exampleStore } from '../../metrics/example/store.ts';
+import { metric as testsMetric } from '../../metrics/tests/metric.ts';
+import { store as testsStore } from '../../metrics/tests/store.ts';
 
 export const workerRegistry: readonly WorkerEntry[] = [
   { metric: complexityMetric, store: complexityStore },
   { metric: coverageMetric, store: coverageStore },
   { metric: exampleMetric, store: exampleStore },
+  { metric: testsMetric, store: testsStore },
 ];
