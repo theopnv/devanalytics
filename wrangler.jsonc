@@ -1,15 +1,20 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "devanalytics",
-  "main": "src/index.ts",
-  "compatibility_date": "2026-11-01",
-  "observability": { "enabled": true },
-  "vars": { "DAILY_WRITE_LIMIT": "100000" },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "devanalytics",
-      "migrations_dir": "migrations"
-    }
-  ]
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "devanalytics",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-11-01",
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		"DAILY_WRITE_LIMIT": "100000"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "devanalytics",
+			"migrations_dir": "migrations",
+			"database_id": "b90b05fc-d6b6-40e4-801e-f7c1363fd46b"
+		}
+	]
 }
