@@ -1,0 +1,24 @@
+# metrics/complexity/naming.ts
+
+- FunctionNode · type · L3-L6 — type FunctionNode = | TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression;
+- NamedFunction · interface · L8-L13 — interface NamedFunction
+- Scope · interface · L15-L18 — interface Scope
+- Namer · type · L20-L20 — type Namer = (parent: TSESTree.Node, child: TSESTree.Node, ancestors: TSESTree.Node[]) => string | null;
+- isFunctionNode · function · L43-L47 — function isFunctionNode(node: TSESTree.Node | null | undefined): node is FunctionNode
+- isNode · function · L49-L51 — function isNode(value: unknown): value is TSESTree.Node
+- childNodes · function · L53-L63 — function childNodes(node: TSESTree.Node): TSESTree.Node[]
+- unwrapTypes · function · L65-L71 — function unwrapTypes(node: TSESTree.Node | null | undefined): TSESTree.Node | null | undefined
+- keyName · function · L73-L87 — function keyName(key: TSESTree.Node, computed: boolean): string
+- accessorName · function · L89-L91 — function accessorName(kind: string, name: string): string
+- memberName · function · L93-L101 — function memberName(node: TSESTree.Node): string
+- calleeName · function · L103-L115 — function calleeName(callee: TSESTree.Node): string
+- jsxName · function · L117-L125 — function jsxName(name: TSESTree.JSXTagNameExpression | TSESTree.JSXAttribute['name']): string
+- namingParent · function · L171-L181 — function namingParent(node: TSESTree.Node, ancestors: TSESTree.Node[])
+- functionName · function · L183-L190 — function functionName(node: FunctionNode, ancestors: TSESTree.Node[]): string
+- containerName · function · L193-L206 — function containerName(node: TSESTree.Node): string | null
+- enterScope · function · L208-L213 — function enterScope(scope: Scope, segment: string): Scope
+- functionStart · function · L215-L218 — function functionStart(node: FunctionNode, ancestors: TSESTree.Node[]): TSESTree.Position
+- nameFunctions · function · L224-L240 — function nameFunctions(program: TSESTree.Program): NamedFunction[]
+- visit · function · L226-L237 — visit = (node: TSESTree.Node, ancestors: TSESTree.Node[], scope: Scope)
+- isBefore · function · L242-L244 — function isBefore(a: TSESTree.Position, b: TSESTree.Position): boolean
+- findFunctionAt · function · L246-L255 — function findFunctionAt(functions: NamedFunction[], position: TSESTree.Position): NamedFunction | undefined

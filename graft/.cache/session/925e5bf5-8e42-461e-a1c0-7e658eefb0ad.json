@@ -1,0 +1,18 @@
+{
+  "lastQuery": "Implement T5 of @PLAN.md",
+  "perAgentQuery": {},
+  "graftReads": 0,
+  "sourceReads": 0,
+  "savedTokens": 0,
+  "injectedPointers": [
+    "worker-configuration.d.ts:L12311-L12315",
+    "eslint.config.ts",
+    "worker-configuration.d.ts:L8749-L8758",
+    "core/worker/budget.ts:L62-L70",
+    "core/worker/ingest.ts:L34-L48"
+  ],
+  "nudges": 2,
+  "inputCostMicros": 2735535,
+  "inputTokensBilled": 8971221,
+  "lastBillingUuid": "4c2950aa-e377-4406-bed6-3cb110837da7"
+}

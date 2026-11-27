@@ -1,0 +1,30 @@
+# metrics/tests/report.ts
+
+- TestException · interface · L4-L10 — interface TestException
+- SuiteReport · interface · L13-L20 — interface SuiteReport
+- TestState · type · L22-L22 — type TestState = 'passed' | 'failed' | 'skipped';
+- Json · type · L26-L26 — type Json = Record<string, unknown>;
+- isRecord · function · L28-L30 — function isRecord(value: unknown): value is Json
+- listOf · function · L32-L34 — function listOf(value: unknown): unknown[]
+- textOf · function · L36-L38 — function textOf(value: unknown): string
+- clipError · function · L41-L44 — function clipError(message: string): string
+- clipText · function · L46-L48 — function clipText(text: string): string
+- emptyReport · function · L50-L50 — emptyReport = (): SuiteReport
+- record · function · L52-L68 — function record(report: SuiteReport, state: TestState, retries: number, exception: Omit<TestException, 'status' | 'retries'>): void
+- isState · function · L70-L72 — function isState(value: unknown): value is TestState
+- summarizeVitestReporter · function · L78-L95 — function summarizeVitestReporter(value: unknown): SuiteReport
+- vitestState · function · L97-L99 — function vitestState(status: unknown): TestState
+- relativeFile · function · L102-L105 — function relativeFile(file: string, root: string | undefined): string
+- recordVitestFile · function · L107-L115 — function recordVitestFile(report: SuiteReport, file: Json, root: string | undefined): void
+- summarizeVitestJson · function · L118-L127 — function summarizeVitestJson(value: unknown, root?: string): SuiteReport
+- playwrightState · function · L129-L137 — function playwrightState(status: unknown): TestState | undefined
+- firstError · function · L140-L147 — function firstError(results: unknown[]): string
+- recordPlaywrightTest · function · L149-L156 — function recordPlaywrightTest(report: SuiteReport, test: unknown, file: string, title: string): void
+- walkSpecs · function · L158-L167 — function walkSpecs(suite: Json, titles: string[], report: SuiteReport): void
+- summarizePlaywright · function · L170-L181 — function summarizePlaywright(value: unknown): SuiteReport
+- asList · function · L183-L183 — asList = (value: unknown): unknown[]
+- junitMessage · function · L186-L192 — function junitMessage(node: unknown): string
+- junitCases · function · L194-L200 — function junitCases(node: Json, suiteName: string): { testCase: Json; suiteName: string }[]
+- junitState · function · L202-L212 — function junitState(testCase: Json): { state: TestState; retries: number; error: string }
+- summarizeJunit · function · L215-L231 — function summarizeJunit(xml: string): SuiteReport
+- summarizeReport · function · L237-L252 — function summarizeReport(text: string, root?: string): SuiteReport

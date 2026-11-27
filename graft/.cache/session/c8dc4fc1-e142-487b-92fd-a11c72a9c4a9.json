@@ -1,0 +1,20 @@
+{
+  "lastQuery": "I merged both. Continue with K2, K3 and K4 in the same PR",
+  "perAgentQuery": {},
+  "graftReads": 0,
+  "sourceReads": 2,
+  "savedTokens": 0,
+  "injectedPointers": [
+    "core/backfill/run.ts:L202-L218",
+    "worker-configuration.d.ts:L12801-L12809",
+    "core/backfill/uploader.ts:L36-L56",
+    "worker-configuration.d.ts:L9797-L9800",
+    "metrics/complexity/fixtures/src/app.js:L1-L20",
+    "core/worker/auth.ts"
+  ],
+  "nudges": 0,
+  "host": "claude-code",
+  "inputCostMicros": 5254137,
+  "inputTokensBilled": 22756496,
+  "lastBillingUuid": "3e627997-e29b-4b83-9ed0-6dc4c29afe7c"
+}

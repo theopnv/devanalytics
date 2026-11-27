@@ -1,0 +1,16 @@
+{
+  "lastQuery": "Commit and create PR",
+  "perAgentQuery": {},
+  "graftReads": 0,
+  "sourceReads": 0,
+  "savedTokens": 0,
+  "injectedPointers": [
+    "worker-configuration.d.ts:L10622-L10649",
+    "core/contract.ts:L7-L10",
+    "metrics/example/metric.ts"
+  ],
+  "nudges": 1,
+  "inputCostMicros": 411206,
+  "inputTokensBilled": 1274363,
+  "lastBillingUuid": "27a9036c-1629-4939-87b9-29c9e683f57a"
+}

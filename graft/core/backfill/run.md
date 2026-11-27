@@ -1,0 +1,24 @@
+# core/backfill/run.ts
+
+- BackfillDeps · interface · L17-L25 — interface BackfillDeps
+- BackfillStatus · type · L27-L27 — type BackfillStatus = 'done' | 'stopped' | 'dry-run' | 'too-large' | 'no-targets' | 'failed';
+- BackfillResult · interface · L29-L37 — interface BackfillResult
+- Kind · type · L39-L39 — type Kind = 'commits' | 'runs';
+- Setup · interface · L41-L47 — interface Setup
+- setup · function · L51-L70 — function setup(options: BackfillOptions, deps: BackfillDeps): Setup
+- Plan · type · L72-L72 — type Plan = { kind: 'commits'; selection: Selection } | { kind: 'runs' };
+- plan · function · L75-L93 — function plan({ kind, repo, entry }: Setup, options: BackfillOptions): Plan
+- listTargets · function · L95-L109 — async function listTargets(context: Setup, chosen: Plan, options: BackfillOptions, deps: BackfillDeps): Promise<Target[]>
+- describeTooLarge · function · L111-L113 — function describeTooLarge(label: string, cost: number, ceiling: number): string
+- Collected · interface · L115-L119 — interface Collected
+- collectAll · function · L122-L149 — async function collectAll(context: Setup, options: BackfillOptions, deps: BackfillDeps, targets: Target[], cache: Cache): Promise<Collected>
+- daysFor · function · L151-L151 — daysFor = (rows: number, limits: Limits): number
+- plural · function · L152-L152 — plural = (count: number, word: string): string
+- sumCost · function · L153-L153 — sumCost = (pending: readonly Pending[]): number
+- reportStop · function · L155-L164 — function reportStop(stop: Stop, uploaded: number, total: number, limits: Limits, deps: BackfillDeps): BackfillStatus
+- listPending · function · L166-L171 — function listPending(pending: readonly Pending[], limits: Limits, deps: BackfillDeps): void
+- destinationFrom · function · L173-L183 — function destinationFrom(options: BackfillOptions, deps: BackfillDeps): UploadTarget | undefined
+- resultFor · function · L187-L189 — function resultFor(total: number)
+- UploadPhase · interface · L191-L200 — interface UploadPhase
+- uploadPhase · function · L202-L218 — async function uploadPhase({ context, options, deps, destination, cache, collected, total, alreadyUploaded }: UploadPhase): Promise<BackfillResult>
+- runBackfill · function · L224-L253 — async function runBackfill(options: BackfillOptions, deps: BackfillDeps): Promise<BackfillResult>
