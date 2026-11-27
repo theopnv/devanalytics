@@ -1,5 +1,5 @@
 import type { TableRows, WorkerEntry } from '../contract.ts';
-import { checkBudget, readUsage, recordUsage, utcDay } from './budget.ts';
+import { checkBudget, estimateCost, readUsage, recordUsage, utcDay } from './budget.ts';
 import type { Limits } from './budget.ts';
 import { countStatements, replaceRows, snapshotKey } from './replace.ts';
 import type { SnapshotKey } from './replace.ts';
@@ -39,7 +39,7 @@ export async function ingest(db: D1Database, { metric, store }: WorkerEntry, bod
 
   const day = utcDay(options.now);
   const { used, replaced } = await readState(db, day, key, store.tables);
-  const cost = inserts.reduce((total, { rows }) => total + rows.length, 0) + replaced + 1;
+  const cost = estimateCost(inserts, replaced);
   checkBudget(used, cost, options.backfill ? options.limits.backfillLimit : options.limits.limit, options.now);
 
   const written = (await replaceRows(db, key, store.tables, inserts)) + 1;
