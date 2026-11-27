@@ -1,0 +1,47 @@
+# Copy this file to .github/workflows/devanalytics-commit.yml in your repository.
+# It records one snapshot for each commit that reaches the default branch.
+name: Devanalytics commit metrics
+
+on:
+  push:
+    # Use the name of your default branch.
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  complexity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: theopnv/devanalytics/action@v1
+        with:
+          metric: complexity
+          worker-url: ${{ vars.DEVANALYTICS_URL }}
+          token: ${{ secrets.DEVANALYTICS_INGEST_TOKEN }}
+          include: |
+            src/**/*.{ts,tsx,js,jsx}
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Use your own test command. It must write an Istanbul coverage-final.json or an lcov.info.
+      - run: npx vitest run --coverage --coverage.reporter=lcov --reporter=json --outputFile=test-results/vitest.json
+      - uses: theopnv/devanalytics/action@v1
+        with:
+          metric: coverage
+          worker-url: ${{ vars.DEVANALYTICS_URL }}
+          token: ${{ secrets.DEVANALYTICS_INGEST_TOKEN }}
+          # One line for each suite. With two or more lines, the Action adds the suite "total".
+          reports: |
+            unit=coverage/lcov.info
+          # Optional. It fills the test counts of each suite.
+          test-results: |
+            unit=test-results/vitest.json

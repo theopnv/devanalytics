@@ -61,12 +61,20 @@ With 300 files in 30 folders and two suites (`unit` and `total`), an ingest writ
 
 `backfill: 'commits'`. Use `--tags`, `--every <n>` or `--refs`. Old commits have no coverage report, so give `--run` a command that makes the reports, for example `--run "npm ci && npx vitest run --coverage"`. The `reports` input names the files that the command writes: `--input reports=unit=coverage/lcov.info`. An input that is repeated keeps its last value, so for two reports use one value with a new line between them, for example `--input $'reports=unit=a.info\ne2e=b.info'` in a POSIX shell.
 
+## Dashboard
+
+`dashboard.json` is a Grafana export. Import it as described in `docs/setup-grafana.md`.
+
+- **Inputs of the import:** the data source, `WORKER_URL` and `REPO_URL`. The data links use `REPO_URL`.
+- **Variables:** `folder` and `suite`. The defaults are the root `.` and `total`.
+- **Panels:** the coverage of the newest snapshot, line coverage over time for each suite, line coverage by suite, the direct children of the folder, the 20 files with the most uncovered lines, and the test counts. The test panels are empty when the `test-results` input is not set.
+
 ## Workflow step
 
 ```yaml
 - uses: actions/checkout@v4
 - run: npx vitest run --coverage --coverage.reporter=lcov
-- uses: <owner>/devanalytics@v1
+- uses: <owner>/devanalytics/action@v1
   with:
     metric: coverage
     worker-url: ${{ vars.DEVANALYTICS_URL }}

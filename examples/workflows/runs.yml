@@ -1,0 +1,53 @@
+# Copy this file to .github/workflows/devanalytics-runs.yml in your repository.
+# It records the timing and the test results of each run of the workflows that you list below, on any branch.
+#
+# The `tests` job reads the test reports that your test workflow uploads as artifacts.
+# Upload one artifact for each runner, and name it after the runner. In your test workflow:
+#
+#   - uses: actions/upload-artifact@v4
+#     if: ${{ !cancelled() }}
+#     with:
+#       name: ${{ matrix.os }}
+#       path: reports/unit.json
+#
+# The `tests` job below then finds `reports/<runner>/unit.json` for each runner.
+name: Devanalytics run metrics
+
+on:
+  workflow_run:
+    # Use the names of your own workflows.
+    workflows: [Test]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: theopnv/devanalytics/action@v1
+        with:
+          metric: ci
+          worker-url: ${{ vars.DEVANALYTICS_URL }}
+          token: ${{ secrets.DEVANALYTICS_INGEST_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: reports
+      - uses: theopnv/devanalytics/action@v1
+        with:
+          metric: tests
+          worker-url: ${{ vars.DEVANALYTICS_URL }}
+          token: ${{ secrets.DEVANALYTICS_INGEST_TOKEN }}
+          working-directory: reports
+          # One line for each suite. The path is relative to the folder of each runner.
+          reports: |
+            unit=unit.json

@@ -1,0 +1,899 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_DEVANALYTICS",
+      "label": "Devanalytics",
+      "description": "The Infinity data source with the query token of your Worker.",
+      "type": "datasource",
+      "pluginId": "yesoreyeram-infinity-datasource",
+      "pluginName": "Infinity"
+    },
+    {
+      "name": "WORKER_URL",
+      "label": "Worker URL",
+      "description": "The address of your Worker, with no slash at the end.",
+      "type": "constant",
+      "value": "https://devanalytics.example.workers.dev"
+    },
+    {
+      "name": "REPO_URL",
+      "label": "Repository URL",
+      "description": "The GitHub address of the repository, with no slash at the end. The data links use it.",
+      "type": "constant",
+      "value": "https://github.com/owner/repo"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "yesoreyeram-infinity-datasource",
+      "name": "Infinity",
+      "version": "3.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "barchart",
+      "name": "barchart",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "timeseries",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "description": "Line, statement, function and branch coverage of the repository, for each suite and folder.",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 100,
+      "type": "row",
+      "title": "Coverage",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 1,
+      "type": "stat",
+      "title": "Latest commit",
+      "description": "The coverage of the folder and the suite in the newest snapshot. A pair with no branches shows no value.",
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 24,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/coverage/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(folder, prefix) AS (SELECT folder, CASE WHEN folder = '.' THEN '' ELSE folder || '/' END FROM (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN '.' ELSE ?1 END AS folder)), u(suite) AS (SELECT CASE WHEN ?2 = '' OR substr(?2, 1, 1) = '$' THEN 'total' ELSE ?2 END), latest(sha) AS (SELECT sha FROM coverage_folder_summary WHERE folder = '.' AND suite = 'total' ORDER BY date DESC LIMIT 1) SELECT 100.0 * s.lines_covered / s.lines_total AS lines, 100.0 * s.statements_covered / s.statements_total AS statements, 100.0 * s.functions_covered / s.functions_total AS functions, 100.0 * s.branches_covered / s.branches_total AS branches FROM coverage_folder_summary s, f, u WHERE s.sha = (SELECT sha FROM latest) AND s.folder = f.folder AND s.suite = u.suite\",\"params\":[\"$folder\",\"$suite\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "lines",
+              "text": "lines",
+              "type": "number"
+            },
+            {
+              "selector": "statements",
+              "text": "statements",
+              "type": "number"
+            },
+            {
+              "selector": "functions",
+              "text": "functions",
+              "type": "number"
+            },
+            {
+              "selector": "branches",
+              "text": "branches",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 60
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "orientation": "auto"
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 2,
+      "type": "timeseries",
+      "title": "Line coverage over time",
+      "description": "The line coverage of the folder for each suite, in percent.",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/coverage/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(folder, prefix) AS (SELECT folder, CASE WHEN folder = '.' THEN '' ELSE folder || '/' END FROM (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN '.' ELSE ?1 END AS folder)) SELECT s.date, s.suite, 100.0 * s.lines_covered / s.lines_total AS lines_pct FROM coverage_folder_summary s, f WHERE s.folder = f.folder ORDER BY s.date\",\"params\":[\"$folder\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "suite",
+              "text": "suite",
+              "type": "string"
+            },
+            {
+              "selector": "lines_pct",
+              "text": "lines_pct",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "linear",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "displayName": "${__field.labels.suite}"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 3,
+      "type": "barchart",
+      "title": "Line coverage by suite",
+      "description": "The line coverage of the folder for each suite in the newest snapshot.",
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/coverage/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(folder, prefix) AS (SELECT folder, CASE WHEN folder = '.' THEN '' ELSE folder || '/' END FROM (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN '.' ELSE ?1 END AS folder)), latest(sha) AS (SELECT sha FROM coverage_folder_summary WHERE folder = '.' AND suite = 'total' ORDER BY date DESC LIMIT 1) SELECT s.suite, 100.0 * s.lines_covered / s.lines_total AS lines FROM coverage_folder_summary s, f WHERE s.sha = (SELECT sha FROM latest) AND s.folder = f.folder ORDER BY s.suite\",\"params\":[\"$folder\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "suite",
+              "text": "suite",
+              "type": "string"
+            },
+            {
+              "selector": "lines",
+              "text": "lines",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "gradientMode": "none"
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "suite",
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "xTickLabelRotation": -45,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 4,
+      "type": "barchart",
+      "title": "Folder breakdown",
+      "description": "The direct children of the folder for the suite in the newest snapshot. The folder with the most uncovered lines is first.",
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/coverage/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(folder, prefix) AS (SELECT folder, CASE WHEN folder = '.' THEN '' ELSE folder || '/' END FROM (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN '.' ELSE ?1 END AS folder)), u(suite) AS (SELECT CASE WHEN ?2 = '' OR substr(?2, 1, 1) = '$' THEN 'total' ELSE ?2 END), latest(sha) AS (SELECT sha FROM coverage_folder_summary WHERE folder = '.' AND suite = 'total' ORDER BY date DESC LIMIT 1) SELECT substr(s.folder, length(f.prefix) + 1) AS child, 100.0 * s.lines_covered / s.lines_total AS lines_pct, 100.0 * s.branches_covered / s.branches_total AS branches_pct FROM coverage_folder_summary s, f, u WHERE s.sha = (SELECT sha FROM latest) AND s.suite = u.suite AND s.folder <> f.folder AND substr(s.folder, 1, length(f.prefix)) = f.prefix AND instr(substr(s.folder, length(f.prefix) + 1), '/') = 0 ORDER BY s.lines_total - s.lines_covered DESC LIMIT 30\",\"params\":[\"$folder\",\"$suite\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "child",
+              "text": "child",
+              "type": "string"
+            },
+            {
+              "selector": "lines_pct",
+              "text": "lines_pct",
+              "type": "number"
+            },
+            {
+              "selector": "branches_pct",
+              "text": "branches_pct",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "gradientMode": "none"
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "child",
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "xTickLabelRotation": -45,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 5,
+      "type": "table",
+      "title": "Most uncovered lines",
+      "description": "The 20 files under the folder with the most uncovered lines for the suite in the newest snapshot.",
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/coverage/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(folder, prefix) AS (SELECT folder, CASE WHEN folder = '.' THEN '' ELSE folder || '/' END FROM (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN '.' ELSE ?1 END AS folder)), u(suite) AS (SELECT CASE WHEN ?2 = '' OR substr(?2, 1, 1) = '$' THEN 'total' ELSE ?2 END), latest(sha) AS (SELECT sha FROM coverage_folder_summary WHERE folder = '.' AND suite = 'total' ORDER BY date DESC LIMIT 1) SELECT c.file, 100.0 * c.lines_covered / c.lines_total AS lines_pct, c.lines_total - c.lines_covered AS uncovered_lines, c.sha FROM coverage_files c, f, u WHERE c.sha = (SELECT sha FROM latest) AND c.suite = u.suite AND c.lines_total > c.lines_covered AND substr(c.file, 1, length(f.prefix)) = f.prefix ORDER BY uncovered_lines DESC, lines_pct LIMIT 20\",\"params\":[\"$folder\",\"$suite\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "file",
+              "text": "file",
+              "type": "string"
+            },
+            {
+              "selector": "lines_pct",
+              "text": "lines_pct",
+              "type": "number"
+            },
+            {
+              "selector": "uncovered_lines",
+              "text": "uncovered_lines",
+              "type": "number"
+            },
+            {
+              "selector": "sha",
+              "text": "sha",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "sha"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "file"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open on GitHub",
+                    "url": "${REPO_URL}/blob/${__data.fields.sha}/${__value.raw}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "lines_pct"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "lines_pct"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 60
+                    },
+                    {
+                      "color": "green",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "file": 0,
+              "lines_pct": 1,
+              "uncovered_lines": 2,
+              "sha": 3
+            },
+            "excludeByName": {},
+            "renameByName": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "type": "row",
+      "title": "Tests",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 6,
+      "type": "timeseries",
+      "title": "Tests over time",
+      "description": "The number of tests in each suite, and the total, for each commit. It needs the test-results input.",
+      "gridPos": {
+        "x": 0,
+        "y": 31,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/coverage/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"SELECT date, suite, tests FROM ( SELECT date, suite, tests FROM coverage_tests UNION ALL SELECT date, 'total' AS suite, sum(tests) AS tests FROM coverage_tests GROUP BY sha, date ) ORDER BY date\"}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "suite",
+              "text": "suite",
+              "type": "string"
+            },
+            {
+              "selector": "tests",
+              "text": "tests",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "linear",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "displayName": "${__field.labels.suite}"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 7,
+      "type": "table",
+      "title": "Tests in the newest snapshot",
+      "description": "The counts of each suite, and the total.",
+      "gridPos": {
+        "x": 12,
+        "y": 31,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/coverage/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH latest(sha) AS (SELECT sha FROM coverage_tests ORDER BY date DESC LIMIT 1) SELECT suite, tests, files, skipped FROM coverage_tests WHERE sha = (SELECT sha FROM latest) UNION ALL SELECT 'total', sum(tests), sum(files), sum(skipped) FROM coverage_tests WHERE sha = (SELECT sha FROM latest)\"}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "suite",
+              "text": "suite",
+              "type": "string"
+            },
+            {
+              "selector": "tests",
+              "text": "tests",
+              "type": "number"
+            },
+            {
+              "selector": "files",
+              "text": "files",
+              "type": "number"
+            },
+            {
+              "selector": "skipped",
+              "text": "skipped",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "suite": 0,
+              "tests": 1,
+              "files": 2,
+              "skipped": 3
+            },
+            "excludeByName": {},
+            "renameByName": {}
+          }
+        }
+      ]
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [
+    "devanalytics"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "folder",
+        "label": "Folder",
+        "type": "query",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "${DS_DEVANALYTICS}"
+        },
+        "query": {
+          "query": "",
+          "queryType": "infinity",
+          "infinityQuery": {
+            "refId": "variable",
+            "type": "json",
+            "source": "url",
+            "parser": "backend",
+            "format": "table",
+            "url": "${WORKER_URL}/v1/coverage/query",
+            "url_options": {
+              "method": "POST",
+              "data": "{\"sql\":\"SELECT DISTINCT folder FROM coverage_folder_summary WHERE sha = (SELECT sha FROM coverage_folder_summary WHERE folder = '.' AND suite = 'total' ORDER BY date DESC LIMIT 1) AND suite = 'total' ORDER BY folder\"}",
+              "body_type": "raw",
+              "body_content_type": "application/json",
+              "headers": []
+            },
+            "root_selector": "rows",
+            "columns": [
+              {
+                "selector": "folder",
+                "text": "folder",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "definition": "",
+        "refresh": 1,
+        "sort": 0,
+        "multi": false,
+        "includeAll": false,
+        "hide": 0,
+        "options": [],
+        "current": {
+          "text": ".",
+          "value": "."
+        }
+      },
+      {
+        "name": "suite",
+        "label": "Suite",
+        "type": "query",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "${DS_DEVANALYTICS}"
+        },
+        "query": {
+          "query": "",
+          "queryType": "infinity",
+          "infinityQuery": {
+            "refId": "variable",
+            "type": "json",
+            "source": "url",
+            "parser": "backend",
+            "format": "table",
+            "url": "${WORKER_URL}/v1/coverage/query",
+            "url_options": {
+              "method": "POST",
+              "data": "{\"sql\":\"SELECT DISTINCT suite FROM coverage_folder_summary WHERE sha = (SELECT sha FROM coverage_folder_summary WHERE folder = '.' AND suite = 'total' ORDER BY date DESC LIMIT 1) AND folder = '.' ORDER BY suite <> 'total', suite\"}",
+              "body_type": "raw",
+              "body_content_type": "application/json",
+              "headers": []
+            },
+            "root_selector": "rows",
+            "columns": [
+              {
+                "selector": "suite",
+                "text": "suite",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "definition": "",
+        "refresh": 1,
+        "sort": 0,
+        "multi": false,
+        "includeAll": false,
+        "hide": 0,
+        "options": [],
+        "current": {
+          "text": "total",
+          "value": "total"
+        }
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1y/d",
+    "to": "now/d"
+  },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Devanalytics: coverage",
+  "uid": "devanalytics-coverage",
+  "version": 1
+}
