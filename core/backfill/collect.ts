@@ -21,9 +21,9 @@ export interface CollectJob {
   env: Readonly<Record<string, string | undefined>>;
 }
 
-/** The string that names a snapshot in the cache and in `state.json`. */
+/** The string that names a snapshot in the cache and in `state.json`. A snapshot of a run can also have a `sha`, so the run key comes first. */
 export function snapshotId(snapshot: Snapshot): string {
-  return 'sha' in snapshot ? snapshot.sha : `${snapshot.run_id}-${snapshot.run_attempt}`;
+  return 'run_id' in snapshot ? `${snapshot.run_id}-${snapshot.run_attempt}` : snapshot.sha;
 }
 
 function runCommand(command: string, cwd: string, env: CollectJob['env']): Promise<void> {
