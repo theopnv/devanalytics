@@ -55,6 +55,14 @@ One row for each suite and runner, and one row for each exception. A run with 3 
 
 `backfill: 'runs'`. Use `--repo <owner/name> --since <date>` with `GITHUB_TOKEN`. For each run, the collector downloads the artifacts of the run and reads them as above. GitHub keeps artifacts for 90 days by default, so older runs cannot be collected. Pass the `reports` input with `--input`. For two reports, use one value with a new line between them, for example `--input $'reports=unit=unit.json\ne2e=e2e.json'` in a POSIX shell.
 
+## Dashboard
+
+`dashboard.json` is a Grafana export. Import it as described in `docs/setup-grafana.md`.
+
+- **Inputs of the import:** the data source, `WORKER_URL` and `REPO_URL`. The data links use `REPO_URL`.
+- **Variables:** none. Every panel shows all suites.
+- **Panels:** the share of suite runs with a flaky test and with a failed test for each week, the test count of each suite, the ten flakiest tests, and the 20 newest failures. A link opens the run on GitHub.
+
 ## Workflow step
 
 Use a `workflow_run` workflow, so that a pull request cannot read the token.
@@ -65,7 +73,7 @@ Use a `workflow_run` workflow, so that a pull request cannot read the token.
     run-id: ${{ github.event.workflow_run.id }}
     github-token: ${{ secrets.GITHUB_TOKEN }}
     path: reports
-- uses: <owner>/devanalytics@v1
+- uses: <owner>/devanalytics/action@v1
   with:
     metric: tests
     worker-url: ${{ vars.DEVANALYTICS_URL }}

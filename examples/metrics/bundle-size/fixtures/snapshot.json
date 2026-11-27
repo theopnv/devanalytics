@@ -1,0 +1,9 @@
+{
+  "sha": "0123456789abcdef0123456789abcdef01234567",
+  "date": "2026-01-15T10:00:00.000Z",
+  "files": [
+    { "path": "assets/app.css", "bytes": 20, "gzip_bytes": 40 },
+    { "path": "assets/app.js", "bytes": 350, "gzip_bytes": 62 },
+    { "path": "index.html", "bytes": 34, "gzip_bytes": 52 }
+  ]
+}

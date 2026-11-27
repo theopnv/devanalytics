@@ -1,0 +1,590 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_DEVANALYTICS",
+      "label": "Devanalytics",
+      "description": "The Infinity data source with the query token of your Worker.",
+      "type": "datasource",
+      "pluginId": "yesoreyeram-infinity-datasource",
+      "pluginName": "Infinity"
+    },
+    {
+      "name": "WORKER_URL",
+      "label": "Worker URL",
+      "description": "The address of your Worker, with no slash at the end.",
+      "type": "constant",
+      "value": "https://devanalytics.example.workers.dev"
+    },
+    {
+      "name": "REPO_URL",
+      "label": "Repository URL",
+      "description": "The GitHub address of the repository, with no slash at the end. The data links use it.",
+      "type": "constant",
+      "value": "https://github.com/owner/repo"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "yesoreyeram-infinity-datasource",
+      "name": "Infinity",
+      "version": "3.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "timeseries",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "description": "Flaky and failed tests of the CI runs.",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 1,
+      "type": "timeseries",
+      "title": "Runs with a flaky test",
+      "description": "The share of suite runs in which at least one test passed on a retry, for each week and suite. A suite that runs on three runners counts three times for each run.",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/tests/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"SELECT date(substr(date, 1, 10), 'weekday 0', '-6 days') AS date, suite, 100.0 * sum(flaky > 0) / count(*) AS flaky_pct FROM tests_suites GROUP BY 1, suite ORDER BY 1\"}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "suite",
+              "text": "suite",
+              "type": "string"
+            },
+            {
+              "selector": "flaky_pct",
+              "text": "flaky_pct",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "linear",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "percent",
+          "min": 0,
+          "displayName": "${__field.labels.suite}"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 2,
+      "type": "timeseries",
+      "title": "Runs with a failed test",
+      "description": "The share of suite runs in which at least one test failed, for each week and suite.",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/tests/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"SELECT date(substr(date, 1, 10), 'weekday 0', '-6 days') AS date, suite, 100.0 * sum(failed > 0) / count(*) AS failed_pct FROM tests_suites GROUP BY 1, suite ORDER BY 1\"}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "suite",
+              "text": "suite",
+              "type": "string"
+            },
+            {
+              "selector": "failed_pct",
+              "text": "failed_pct",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "linear",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "percent",
+          "min": 0,
+          "displayName": "${__field.labels.suite}"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 3,
+      "type": "timeseries",
+      "title": "Tests in each suite",
+      "description": "The largest test count of a run of each suite, for each week.",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/tests/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"SELECT date(substr(date, 1, 10), 'weekday 0', '-6 days') AS date, suite, max(tests) AS tests FROM tests_suites GROUP BY 1, suite ORDER BY 1\"}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "suite",
+              "text": "suite",
+              "type": "string"
+            },
+            {
+              "selector": "tests",
+              "text": "tests",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "linear",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "displayName": "${__field.labels.suite}"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 4,
+      "type": "table",
+      "title": "Flakiest tests",
+      "description": "The ten tests that most often passed on a retry. rate_pct is the share of suite runs in which the test was flaky. A test that runs on four runners counts once for each run.",
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/tests/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH runs(suite, total) AS (SELECT suite, count(*) FROM tests_suites GROUP BY suite) SELECT e.file, e.title, e.suite, count(*) AS flaky_runs, r.total AS suite_runs, round(100.0 * count(*) / r.total, 1) AS rate_pct, max(e.date) AS last_seen, e.run_id AS last_run_id FROM tests_exceptions e JOIN runs r ON r.suite = e.suite WHERE e.status = 'flaky' GROUP BY e.file, e.title, e.suite ORDER BY flaky_runs DESC, last_seen DESC LIMIT 10\"}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "file",
+              "text": "file",
+              "type": "string"
+            },
+            {
+              "selector": "title",
+              "text": "title",
+              "type": "string"
+            },
+            {
+              "selector": "suite",
+              "text": "suite",
+              "type": "string"
+            },
+            {
+              "selector": "flaky_runs",
+              "text": "flaky_runs",
+              "type": "number"
+            },
+            {
+              "selector": "suite_runs",
+              "text": "suite_runs",
+              "type": "number"
+            },
+            {
+              "selector": "rate_pct",
+              "text": "rate_pct",
+              "type": "number"
+            },
+            {
+              "selector": "last_seen",
+              "text": "last_seen",
+              "type": "timestamp"
+            },
+            {
+              "selector": "last_run_id",
+              "text": "last_run_id",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "last_run_id"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "last_seen"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open the run on GitHub",
+                    "url": "${REPO_URL}/actions/runs/${__data.fields.last_run_id}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rate_pct"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 5,
+      "type": "table",
+      "title": "Latest failures",
+      "description": "The 20 newest tests that failed in a run.",
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/tests/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"SELECT date, suite, runner, file, title, error, run_id FROM tests_exceptions WHERE status = 'failed' ORDER BY date DESC LIMIT 20\"}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "suite",
+              "text": "suite",
+              "type": "string"
+            },
+            {
+              "selector": "runner",
+              "text": "runner",
+              "type": "string"
+            },
+            {
+              "selector": "file",
+              "text": "file",
+              "type": "string"
+            },
+            {
+              "selector": "title",
+              "text": "title",
+              "type": "string"
+            },
+            {
+              "selector": "error",
+              "text": "error",
+              "type": "string"
+            },
+            {
+              "selector": "run_id",
+              "text": "run_id",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_id"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "date"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open the run on GitHub",
+                    "url": "${REPO_URL}/actions/runs/${__data.fields.run_id}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [
+    "devanalytics"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1y/d",
+    "to": "now/d"
+  },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Devanalytics: tests",
+  "uid": "devanalytics-tests",
+  "version": 1
+}

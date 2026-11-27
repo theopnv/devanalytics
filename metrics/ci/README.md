@@ -50,6 +50,14 @@ One row for the run, one row for each job, one row for each step, and one row fo
 
 `backfill: 'runs'`. Use `--repo <owner/name> --since <date>` with `GITHUB_TOKEN`. GitHub keeps logs for 90 days by default, so older runs cannot be collected. GitHub lists only the newest attempt of each run. Pass `labels` with `--input` if you want labels on old runs.
 
+## Dashboard
+
+`dashboard.json` is a Grafana export. Import it as described in `docs/setup-grafana.md`.
+
+- **Inputs of the import:** the data source and `WORKER_URL`.
+- **Variables:** `workflow` and `group`. The defaults are the workflow with the most runs and the log group with the most total time. Every time panel counts the runs of one workflow with the conclusion `success`.
+- **Panels:** run time percentiles, runs by conclusion, queue time p95, the time of one log group, job time percentiles, the slowest steps and the slowest log groups.
+
 ## Workflow step
 
 Use a `workflow_run` workflow, so that the run is finished and a pull request cannot read the token.
@@ -67,7 +75,7 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: <owner>/devanalytics@v1
+      - uses: <owner>/devanalytics/action@v1
         with:
           metric: ci
           worker-url: ${{ vars.DEVANALYTICS_URL }}

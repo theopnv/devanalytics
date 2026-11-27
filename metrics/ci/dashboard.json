@@ -1,0 +1,851 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_DEVANALYTICS",
+      "label": "Devanalytics",
+      "description": "The Infinity data source with the query token of your Worker.",
+      "type": "datasource",
+      "pluginId": "yesoreyeram-infinity-datasource",
+      "pluginName": "Infinity"
+    },
+    {
+      "name": "WORKER_URL",
+      "label": "Worker URL",
+      "description": "The address of your Worker, with no slash at the end.",
+      "type": "constant",
+      "value": "https://devanalytics.example.workers.dev"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "yesoreyeram-infinity-datasource",
+      "name": "Infinity",
+      "version": "3.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "timeseries",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "description": "The run, job, step and log group times of a GitHub Actions workflow.",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 1,
+      "type": "timeseries",
+      "title": "Run time percentiles",
+      "description": "The wall time of a successful run of the workflow, with p50, p90 and p95 for each week. A week with a few runs shows a p95 close to its maximum.",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/ci/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(workflow) AS (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN (SELECT workflow FROM ci_runs GROUP BY workflow ORDER BY count(*) DESC LIMIT 1) ELSE ?1 END), base AS (SELECT date(substr(r.date, 1, 10), 'weekday 0', '-6 days') AS week, r.wall_seconds AS v FROM ci_runs r, f WHERE r.workflow = f.workflow AND r.conclusion = 'success'), ranked AS (SELECT week, v, ROW_NUMBER() OVER (PARTITION BY week ORDER BY v) AS n, COUNT(*) OVER (PARTITION BY week) AS total FROM base) SELECT week AS date, MIN(CASE WHEN n >= 0.5 * total THEN v END) AS p50, MIN(CASE WHEN n >= 0.9 * total THEN v END) AS p90, MIN(CASE WHEN n >= 0.95 * total THEN v END) AS p95 FROM ranked GROUP BY week ORDER BY week\",\"params\":[\"$workflow\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "p50",
+              "text": "p50",
+              "type": "number"
+            },
+            {
+              "selector": "p90",
+              "text": "p90",
+              "type": "number"
+            },
+            {
+              "selector": "p95",
+              "text": "p95",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "linear",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 2,
+      "type": "timeseries",
+      "title": "Runs by conclusion",
+      "description": "The number of runs of the workflow for each week and conclusion.",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/ci/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(workflow) AS (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN (SELECT workflow FROM ci_runs GROUP BY workflow ORDER BY count(*) DESC LIMIT 1) ELSE ?1 END) SELECT date(substr(r.date, 1, 10), 'weekday 0', '-6 days') AS date, r.conclusion, count(*) AS runs FROM ci_runs r, f WHERE r.workflow = f.workflow GROUP BY 1, 2 ORDER BY 1\",\"params\":[\"$workflow\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "conclusion",
+              "text": "conclusion",
+              "type": "string"
+            },
+            {
+              "selector": "runs",
+              "text": "runs",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 2,
+            "fillOpacity": 60,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "linear",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          },
+          "displayName": "${__field.labels.conclusion}"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 3,
+      "type": "timeseries",
+      "title": "Queue time p95",
+      "description": "The p95 of the wait for a runner, for each week and operating system.",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/ci/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(workflow) AS (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN (SELECT workflow FROM ci_runs GROUP BY workflow ORDER BY count(*) DESC LIMIT 1) ELSE ?1 END), base AS (SELECT date(substr(j.date, 1, 10), 'weekday 0', '-6 days') AS week, j.os, j.queue_seconds AS v FROM ci_jobs j JOIN ci_runs r ON r.run_id = j.run_id AND r.run_attempt = j.run_attempt, f WHERE r.workflow = f.workflow AND r.conclusion = 'success' AND j.conclusion = 'success' AND j.queue_seconds IS NOT NULL), ranked AS (SELECT week, os, v, ROW_NUMBER() OVER (PARTITION BY week, os ORDER BY v) AS n, COUNT(*) OVER (PARTITION BY week, os) AS total FROM base) SELECT week AS date, MIN(CASE WHEN os = 'linux' AND n >= 0.95 * total THEN v END) AS linux, MIN(CASE WHEN os = 'macos' AND n >= 0.95 * total THEN v END) AS macos, MIN(CASE WHEN os = 'windows' AND n >= 0.95 * total THEN v END) AS windows, MIN(CASE WHEN os = 'other' AND n >= 0.95 * total THEN v END) AS other FROM ranked GROUP BY week ORDER BY week\",\"params\":[\"$workflow\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "linux",
+              "text": "linux",
+              "type": "number"
+            },
+            {
+              "selector": "macos",
+              "text": "macos",
+              "type": "number"
+            },
+            {
+              "selector": "windows",
+              "text": "windows",
+              "type": "number"
+            },
+            {
+              "selector": "other",
+              "text": "other",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "linear",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 4,
+      "type": "timeseries",
+      "title": "Log group time",
+      "description": "The average seconds of one log group for each week and operating system. Use the group variable to pick the group.",
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/ci/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(workflow) AS (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN (SELECT workflow FROM ci_runs GROUP BY workflow ORDER BY count(*) DESC LIMIT 1) ELSE ?1 END), g(name) AS (SELECT CASE WHEN ?2 = '' OR substr(?2, 1, 1) = '$' THEN (SELECT name FROM ci_step_groups GROUP BY name ORDER BY sum(duration_ms) DESC LIMIT 1) ELSE ?2 END) SELECT date(substr(x.date, 1, 10), 'weekday 0', '-6 days') AS date, avg(CASE WHEN j.os = 'linux' THEN x.duration_ms END) / 1000.0 AS linux, avg(CASE WHEN j.os = 'macos' THEN x.duration_ms END) / 1000.0 AS macos, avg(CASE WHEN j.os = 'windows' THEN x.duration_ms END) / 1000.0 AS windows, avg(CASE WHEN j.os = 'other' THEN x.duration_ms END) / 1000.0 AS other FROM ci_step_groups x JOIN ci_jobs j ON j.run_id = x.run_id AND j.run_attempt = x.run_attempt AND j.job_id = x.job_id JOIN ci_runs r ON r.run_id = x.run_id AND r.run_attempt = x.run_attempt, f, g WHERE r.workflow = f.workflow AND x.name = g.name GROUP BY 1 ORDER BY 1\",\"params\":[\"$workflow\",\"$group\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "linux",
+              "text": "linux",
+              "type": "number"
+            },
+            {
+              "selector": "macos",
+              "text": "macos",
+              "type": "number"
+            },
+            {
+              "selector": "windows",
+              "text": "windows",
+              "type": "number"
+            },
+            {
+              "selector": "other",
+              "text": "other",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "linear",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 5,
+      "type": "table",
+      "title": "Job time percentiles",
+      "description": "The p50, p90 and p95 of the run time of each successful job, for each operating system. The matrix part of a job name, such as \" (ubuntu-latest)\", is removed.",
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/ci/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(workflow) AS (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN (SELECT workflow FROM ci_runs GROUP BY workflow ORDER BY count(*) DESC LIMIT 1) ELSE ?1 END), base AS (SELECT CASE WHEN instr(j.name, ' (') > 0 THEN substr(j.name, 1, instr(j.name, ' (') - 1) ELSE j.name END AS job, j.os, j.duration_seconds AS v FROM ci_jobs j JOIN ci_runs r ON r.run_id = j.run_id AND r.run_attempt = j.run_attempt, f WHERE r.workflow = f.workflow AND r.conclusion = 'success' AND j.conclusion = 'success' AND j.duration_seconds IS NOT NULL), ranked AS (SELECT job, os, v, ROW_NUMBER() OVER (PARTITION BY job, os ORDER BY v) AS n, COUNT(*) OVER (PARTITION BY job, os) AS total FROM base) SELECT job, os, MAX(total) AS runs, MIN(CASE WHEN n >= 0.5 * total THEN v END) AS p50, MIN(CASE WHEN n >= 0.9 * total THEN v END) AS p90, MIN(CASE WHEN n >= 0.95 * total THEN v END) AS p95 FROM ranked GROUP BY job, os ORDER BY p50 DESC\",\"params\":[\"$workflow\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "job",
+              "text": "job",
+              "type": "string"
+            },
+            {
+              "selector": "os",
+              "text": "os",
+              "type": "string"
+            },
+            {
+              "selector": "runs",
+              "text": "runs",
+              "type": "number"
+            },
+            {
+              "selector": "p50",
+              "text": "p50",
+              "type": "number"
+            },
+            {
+              "selector": "p90",
+              "text": "p90",
+              "type": "number"
+            },
+            {
+              "selector": "p95",
+              "text": "p95",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p50"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p90"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 6,
+      "type": "table",
+      "title": "Slowest steps",
+      "description": "The average seconds that each step takes in a successful run of its job, and the slowest run. A step shorter than a second counts as 0.",
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/ci/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(workflow) AS (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN (SELECT workflow FROM ci_runs GROUP BY workflow ORDER BY count(*) DESC LIMIT 1) ELSE ?1 END), job_runs AS (SELECT CASE WHEN instr(j.name, ' (') > 0 THEN substr(j.name, 1, instr(j.name, ' (') - 1) ELSE j.name END AS job, j.os, count(*) AS runs FROM ci_jobs j JOIN ci_runs r ON r.run_id = j.run_id AND r.run_attempt = j.run_attempt, f WHERE r.workflow = f.workflow AND r.conclusion = 'success' AND j.conclusion = 'success' GROUP BY 1, 2), spent AS (SELECT CASE WHEN instr(j.name, ' (') > 0 THEN substr(j.name, 1, instr(j.name, ' (') - 1) ELSE j.name END AS job, j.os, s.name, sum(s.duration_seconds) AS total, max(s.duration_seconds) AS slowest FROM ci_steps s JOIN ci_jobs j ON j.run_id = s.run_id AND j.run_attempt = s.run_attempt AND j.job_id = s.job_id JOIN ci_runs r ON r.run_id = s.run_id AND r.run_attempt = s.run_attempt, f WHERE r.workflow = f.workflow AND r.conclusion = 'success' AND j.conclusion = 'success' AND s.duration_seconds IS NOT NULL GROUP BY 1, 2, 3) SELECT s.job, s.os, s.name, round(1.0 * s.total / n.runs, 1) AS avg_seconds, s.slowest AS slowest_seconds FROM spent s JOIN job_runs n ON n.job = s.job AND n.os = s.os ORDER BY avg_seconds DESC LIMIT 40\",\"params\":[\"$workflow\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "job",
+              "text": "job",
+              "type": "string"
+            },
+            {
+              "selector": "os",
+              "text": "os",
+              "type": "string"
+            },
+            {
+              "selector": "name",
+              "text": "name",
+              "type": "string"
+            },
+            {
+              "selector": "avg_seconds",
+              "text": "avg_seconds",
+              "type": "number"
+            },
+            {
+              "selector": "slowest_seconds",
+              "text": "slowest_seconds",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg_seconds"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "slowest_seconds"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 7,
+      "type": "table",
+      "title": "Slowest log groups",
+      "description": "The same for the log groups. A group splits a composite action, and it splits the checkout, into their parts.",
+      "gridPos": {
+        "x": 12,
+        "y": 25,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/ci/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(workflow) AS (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN (SELECT workflow FROM ci_runs GROUP BY workflow ORDER BY count(*) DESC LIMIT 1) ELSE ?1 END), job_runs AS (SELECT CASE WHEN instr(j.name, ' (') > 0 THEN substr(j.name, 1, instr(j.name, ' (') - 1) ELSE j.name END AS job, j.os, count(*) AS runs FROM ci_jobs j JOIN ci_runs r ON r.run_id = j.run_id AND r.run_attempt = j.run_attempt, f WHERE r.workflow = f.workflow AND r.conclusion = 'success' AND j.conclusion = 'success' GROUP BY 1, 2), spent AS (SELECT CASE WHEN instr(j.name, ' (') > 0 THEN substr(j.name, 1, instr(j.name, ' (') - 1) ELSE j.name END AS job, j.os, x.name, sum(x.duration_ms) / 1000.0 AS total, max(x.duration_ms) / 1000.0 AS slowest FROM ci_step_groups x JOIN ci_jobs j ON j.run_id = x.run_id AND j.run_attempt = x.run_attempt AND j.job_id = x.job_id JOIN ci_runs r ON r.run_id = x.run_id AND r.run_attempt = x.run_attempt, f WHERE r.workflow = f.workflow AND r.conclusion = 'success' AND j.conclusion = 'success' GROUP BY 1, 2, 3) SELECT s.job, s.os, s.name, round(s.total / n.runs, 1) AS avg_seconds, round(s.slowest, 1) AS slowest_seconds FROM spent s JOIN job_runs n ON n.job = s.job AND n.os = s.os ORDER BY avg_seconds DESC LIMIT 40\",\"params\":[\"$workflow\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "job",
+              "text": "job",
+              "type": "string"
+            },
+            {
+              "selector": "os",
+              "text": "os",
+              "type": "string"
+            },
+            {
+              "selector": "name",
+              "text": "name",
+              "type": "string"
+            },
+            {
+              "selector": "avg_seconds",
+              "text": "avg_seconds",
+              "type": "number"
+            },
+            {
+              "selector": "slowest_seconds",
+              "text": "slowest_seconds",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg_seconds"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "slowest_seconds"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [
+    "devanalytics"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "workflow",
+        "label": "Workflow",
+        "type": "query",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "${DS_DEVANALYTICS}"
+        },
+        "query": {
+          "query": "",
+          "queryType": "infinity",
+          "infinityQuery": {
+            "refId": "variable",
+            "type": "json",
+            "source": "url",
+            "parser": "backend",
+            "format": "table",
+            "url": "${WORKER_URL}/v1/ci/query",
+            "url_options": {
+              "method": "POST",
+              "data": "{\"sql\":\"SELECT workflow FROM ci_runs GROUP BY workflow ORDER BY count(*) DESC\"}",
+              "body_type": "raw",
+              "body_content_type": "application/json",
+              "headers": []
+            },
+            "root_selector": "rows",
+            "columns": [
+              {
+                "selector": "workflow",
+                "text": "workflow",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "definition": "",
+        "refresh": 1,
+        "sort": 0,
+        "multi": false,
+        "includeAll": false,
+        "hide": 0,
+        "options": [],
+        "current": {}
+      },
+      {
+        "name": "group",
+        "label": "Log group",
+        "type": "query",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "${DS_DEVANALYTICS}"
+        },
+        "query": {
+          "query": "",
+          "queryType": "infinity",
+          "infinityQuery": {
+            "refId": "variable",
+            "type": "json",
+            "source": "url",
+            "parser": "backend",
+            "format": "table",
+            "url": "${WORKER_URL}/v1/ci/query",
+            "url_options": {
+              "method": "POST",
+              "data": "{\"sql\":\"SELECT name FROM ci_step_groups GROUP BY name ORDER BY sum(duration_ms) DESC LIMIT 50\"}",
+              "body_type": "raw",
+              "body_content_type": "application/json",
+              "headers": []
+            },
+            "root_selector": "rows",
+            "columns": [
+              {
+                "selector": "name",
+                "text": "name",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "definition": "",
+        "refresh": 1,
+        "sort": 0,
+        "multi": false,
+        "includeAll": false,
+        "hide": 0,
+        "options": [],
+        "current": {}
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1y/d",
+    "to": "now/d"
+  },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Devanalytics: CI",
+  "uid": "devanalytics-ci",
+  "version": 1
+}

@@ -1,0 +1,592 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_DEVANALYTICS",
+      "label": "Devanalytics",
+      "description": "The Infinity data source with the query token of your Worker.",
+      "type": "datasource",
+      "pluginId": "yesoreyeram-infinity-datasource",
+      "pluginName": "Infinity"
+    },
+    {
+      "name": "WORKER_URL",
+      "label": "Worker URL",
+      "description": "The address of your Worker, with no slash at the end.",
+      "type": "constant",
+      "value": "https://devanalytics.example.workers.dev"
+    },
+    {
+      "name": "REPO_URL",
+      "label": "Repository URL",
+      "description": "The GitHub address of the repository, with no slash at the end. The data links use it.",
+      "type": "constant",
+      "value": "https://github.com/owner/repo"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "yesoreyeram-infinity-datasource",
+      "name": "Infinity",
+      "version": "3.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "barchart",
+      "name": "barchart",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "timeseries",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "description": "Cognitive and cyclomatic complexity of the functions of the repository.",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 1,
+      "type": "stat",
+      "title": "Latest commit",
+      "description": "The sums for the folder in the newest snapshot. Tests are not counted.",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/complexity/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(folder, prefix) AS (SELECT folder, CASE WHEN folder = '.' THEN '' ELSE folder || '/' END FROM (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN '.' ELSE ?1 END AS folder)), latest(sha) AS (SELECT sha FROM complexity_folder_summary WHERE folder = '.' ORDER BY date DESC LIMIT 1) SELECT s.function_count AS functions, s.above_limits, s.cognitive_max, s.cyclomatic_max FROM complexity_folder_summary s, f WHERE s.sha = (SELECT sha FROM latest) AND s.folder = f.folder AND s.is_test = 0\",\"params\":[\"$folder\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "functions",
+              "text": "functions",
+              "type": "number"
+            },
+            {
+              "selector": "above_limits",
+              "text": "above_limits",
+              "type": "number"
+            },
+            {
+              "selector": "cognitive_max",
+              "text": "cognitive_max",
+              "type": "number"
+            },
+            {
+              "selector": "cyclomatic_max",
+              "text": "cyclomatic_max",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "orientation": "auto"
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 2,
+      "type": "timeseries",
+      "title": "Complexity over time",
+      "description": "The sum of the cognitive and the cyclomatic complexity of the folder, for each commit.",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/complexity/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(folder, prefix) AS (SELECT folder, CASE WHEN folder = '.' THEN '' ELSE folder || '/' END FROM (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN '.' ELSE ?1 END AS folder)) SELECT s.date, s.cognitive_sum, s.cyclomatic_sum FROM complexity_folder_summary s, f WHERE s.folder = f.folder AND s.is_test = 0 ORDER BY s.date\",\"params\":[\"$folder\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "cognitive_sum",
+              "text": "cognitive_sum",
+              "type": "number"
+            },
+            {
+              "selector": "cyclomatic_sum",
+              "text": "cyclomatic_sum",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "linear",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 3,
+      "type": "timeseries",
+      "title": "Debt over time",
+      "description": "The functions above the limits of the snapshot. This line must go down over time. A function above both limits counts once in above_limits, so it can be less than the sum of the other two lines.",
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${WORKER_URL}/v1/complexity/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(folder, prefix) AS (SELECT folder, CASE WHEN folder = '.' THEN '' ELSE folder || '/' END FROM (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN '.' ELSE ?1 END AS folder)) SELECT s.date, s.above_limits, s.cognitive_above, s.cyclomatic_above FROM complexity_folder_summary s, f WHERE s.folder = f.folder AND s.is_test = 0 ORDER BY s.date\",\"params\":[\"$folder\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "above_limits",
+              "text": "above_limits",
+              "type": "number"
+            },
+            {
+              "selector": "cognitive_above",
+              "text": "cognitive_above",
+              "type": "number"
+            },
+            {
+              "selector": "cyclomatic_above",
+              "text": "cyclomatic_above",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "lineInterpolation": "stepAfter",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 4,
+      "type": "barchart",
+      "title": "Folder breakdown",
+      "description": "The direct children of the folder in the newest snapshot, most complex first.",
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/complexity/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(folder, prefix) AS (SELECT folder, CASE WHEN folder = '.' THEN '' ELSE folder || '/' END FROM (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN '.' ELSE ?1 END AS folder)), latest(sha) AS (SELECT sha FROM complexity_folder_summary WHERE folder = '.' ORDER BY date DESC LIMIT 1) SELECT substr(s.folder, length(f.prefix) + 1) AS child, s.cognitive_sum, s.cyclomatic_sum, s.above_limits FROM complexity_folder_summary s, f WHERE s.sha = (SELECT sha FROM latest) AND s.is_test = 0 AND s.folder <> f.folder AND substr(s.folder, 1, length(f.prefix)) = f.prefix AND instr(substr(s.folder, length(f.prefix) + 1), '/') = 0 ORDER BY s.cognitive_sum DESC LIMIT 30\",\"params\":[\"$folder\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "child",
+              "text": "child",
+              "type": "string"
+            },
+            {
+              "selector": "cognitive_sum",
+              "text": "cognitive_sum",
+              "type": "number"
+            },
+            {
+              "selector": "cyclomatic_sum",
+              "text": "cyclomatic_sum",
+              "type": "number"
+            },
+            {
+              "selector": "above_limits",
+              "text": "above_limits",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "gradientMode": "none"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "child",
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "xTickLabelRotation": -45,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_DEVANALYTICS}"
+      },
+      "id": 5,
+      "type": "table",
+      "title": "Top functions",
+      "description": "The 20 most complex functions under the folder in the newest snapshot.",
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_DEVANALYTICS}"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "${WORKER_URL}/v1/complexity/query",
+          "url_options": {
+            "method": "POST",
+            "data": "{\"sql\":\"WITH f(folder, prefix) AS (SELECT folder, CASE WHEN folder = '.' THEN '' ELSE folder || '/' END FROM (SELECT CASE WHEN ?1 = '' OR substr(?1, 1, 1) = '$' THEN '.' ELSE ?1 END AS folder)), latest(sha) AS (SELECT sha FROM complexity_folder_summary WHERE folder = '.' ORDER BY date DESC LIMIT 1) SELECT fn.qualified_name, fn.file, fn.line, fn.cognitive, fn.cyclomatic, fn.sha FROM complexity_functions fn, f WHERE fn.sha = (SELECT sha FROM latest) AND fn.is_test = 0 AND substr(fn.file, 1, length(f.prefix)) = f.prefix ORDER BY fn.cognitive DESC, fn.cyclomatic DESC LIMIT 20\",\"params\":[\"$folder\"]}",
+            "body_type": "raw",
+            "body_content_type": "application/json",
+            "headers": []
+          },
+          "root_selector": "rows",
+          "columns": [
+            {
+              "selector": "qualified_name",
+              "text": "qualified_name",
+              "type": "string"
+            },
+            {
+              "selector": "file",
+              "text": "file",
+              "type": "string"
+            },
+            {
+              "selector": "line",
+              "text": "line",
+              "type": "number"
+            },
+            {
+              "selector": "cognitive",
+              "text": "cognitive",
+              "type": "number"
+            },
+            {
+              "selector": "cyclomatic",
+              "text": "cyclomatic",
+              "type": "number"
+            },
+            {
+              "selector": "sha",
+              "text": "sha",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "sha"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "file"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open on GitHub",
+                    "url": "${REPO_URL}/blob/${__data.fields.sha}/${__value.raw}#L${__data.fields.line}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [
+    "devanalytics"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "folder",
+        "label": "Folder",
+        "type": "query",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "${DS_DEVANALYTICS}"
+        },
+        "query": {
+          "query": "",
+          "queryType": "infinity",
+          "infinityQuery": {
+            "refId": "variable",
+            "type": "json",
+            "source": "url",
+            "parser": "backend",
+            "format": "table",
+            "url": "${WORKER_URL}/v1/complexity/query",
+            "url_options": {
+              "method": "POST",
+              "data": "{\"sql\":\"SELECT DISTINCT folder FROM complexity_folder_summary WHERE sha = (SELECT sha FROM complexity_folder_summary WHERE folder = '.' ORDER BY date DESC LIMIT 1) AND is_test = 0 ORDER BY folder\"}",
+              "body_type": "raw",
+              "body_content_type": "application/json",
+              "headers": []
+            },
+            "root_selector": "rows",
+            "columns": [
+              {
+                "selector": "folder",
+                "text": "folder",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "definition": "",
+        "refresh": 1,
+        "sort": 0,
+        "multi": false,
+        "includeAll": false,
+        "hide": 0,
+        "options": [],
+        "current": {
+          "text": ".",
+          "value": "."
+        }
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1y/d",
+    "to": "now/d"
+  },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Devanalytics: complexity",
+  "uid": "devanalytics-complexity",
+  "version": 1
+}

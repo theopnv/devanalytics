@@ -46,11 +46,19 @@ For 1000 functions in 40 folders, an ingest writes about 1000 + 80 rows. Replaci
 
 `backfill: 'commits'`. Use `--tags`, `--every <n>` or `--refs`. The collector measures each commit in a temporary worktree.
 
+## Dashboard
+
+`dashboard.json` is a Grafana export. Import it as described in `docs/setup-grafana.md`.
+
+- **Inputs of the import:** the data source, `WORKER_URL` and `REPO_URL`. The data links use `REPO_URL`.
+- **Variable:** `folder`. It lists the folders of the newest snapshot. The root `.` is the default.
+- **Panels:** the sums of the newest snapshot, complexity over time, debt over time, the direct children of the folder, and the 20 most complex functions with a link to the code at the commit.
+
 ## Workflow step
 
 ```yaml
 - uses: actions/checkout@v4
-- uses: <owner>/devanalytics@v1
+- uses: <owner>/devanalytics/action@v1
   with:
     metric: complexity
     worker-url: ${{ vars.DEVANALYTICS_URL }}

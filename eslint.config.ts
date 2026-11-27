@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   {
-    ignores: ['node_modules/**', '.wrangler/**', '.backfill/**', 'action/dist/**', '**/generated/**', 'worker-configuration.d.ts', 'graft/**', '.claude/**'],
+    ignores: ['node_modules/**', '.wrangler/**', '.backfill/**', 'action/dist/**', '**/generated/**', 'worker-configuration.d.ts', 'graft/**', '.claude/**', 'examples/**'],
   },
   {
     files: ['**/*.{ts,mts}'],

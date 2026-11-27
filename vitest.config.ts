@@ -24,7 +24,7 @@ export default defineConfig(async () => {
             name: 'worker',
             setupFiles: ['./test/apply-migrations.ts'],
             include: ['test/**/*.test.ts', '**/*.worker.test.ts'],
-            exclude: ['node_modules/**', 'graft/**', '.claude/**'],
+            exclude: ['node_modules/**', 'graft/**', '.claude/**', 'examples/**'],
           },
         },
         {
@@ -32,7 +32,7 @@ export default defineConfig(async () => {
             name: 'node',
             environment: 'node',
             include: ['**/*.test.ts'],
-            exclude: ['node_modules/**', 'graft/**', '.claude/**', 'test/**', '**/*.worker.test.ts'],
+            exclude: ['node_modules/**', 'graft/**', '.claude/**', 'examples/**', 'test/**', '**/*.worker.test.ts'],
           },
         },
       ],
